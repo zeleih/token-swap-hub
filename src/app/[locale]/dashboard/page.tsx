@@ -356,15 +356,17 @@ export default async function DashboardPage({ searchParams }: PageProps) {
       {activeTab === "usage" ? (
         <>
           <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-            <div className="relative overflow-hidden rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-white/5">
-              <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-blue-500/10 blur-2xl" />
-              <div className="mb-2 flex items-center gap-1.5">
+            <div className="relative rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-white/5">
+              <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-[inherit]">
+                <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-blue-500/10 blur-2xl" />
+              </div>
+              <div className="relative z-10 mb-2 flex items-center gap-1.5">
                 <h3 className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
                   {t("points")}
                 </h3>
                 <HelpHint text={t("pointsHelp")} side="bottom" />
               </div>
-              <div className="flex items-baseline gap-2">
+              <div className="relative z-10 flex items-baseline gap-2">
                 <span className="text-4xl font-bold tracking-tight text-zinc-900 dark:text-white">
                   {formatPoints(user.points)}
                 </span>
@@ -384,8 +386,11 @@ export default async function DashboardPage({ searchParams }: PageProps) {
               labelHelpText={t("platformKeyHelp")}
             />
 
-            <div className="relative flex flex-col justify-between overflow-hidden rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-white/5">
-              <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-emerald-500/10 blur-2xl" />
+            <div className="relative rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-white/5">
+              <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-[inherit]">
+                <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-emerald-500/10 blur-2xl" />
+              </div>
+              <div className="relative z-10 flex flex-col justify-between">
               <div className="mb-2 flex items-center gap-1.5">
                 <h3 className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
                   {t("platformUrl")}
@@ -394,6 +399,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
               </div>
               <DashboardCopyKey platformKey={platformUrl} copyText={t("copy")} />
               <p className="mt-2 text-xs text-zinc-400">{t("platformKeyTip")}</p>
+              </div>
             </div>
           </div>
 
@@ -531,15 +537,17 @@ export default async function DashboardPage({ searchParams }: PageProps) {
       ) : (
         <div className="space-y-6">
           <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-            <div className="relative overflow-hidden rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-white/5">
-              <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-blue-500/10 blur-2xl" />
-              <div className="mb-2 flex items-center gap-1.5">
+            <div className="relative rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-white/5">
+              <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-[inherit]">
+                <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-blue-500/10 blur-2xl" />
+              </div>
+              <div className="relative z-10 mb-2 flex items-center gap-1.5">
                 <h3 className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
                   {t("points")}
                 </h3>
                 <HelpHint text={t("pointsHelp")} side="bottom" />
               </div>
-              <div className="flex items-baseline gap-2">
+              <div className="relative z-10 flex items-baseline gap-2">
                 <span className="text-4xl font-bold tracking-tight text-zinc-900 dark:text-white">
                   {formatPoints(user.points)}
                 </span>

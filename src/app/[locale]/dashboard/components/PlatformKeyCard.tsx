@@ -73,8 +73,11 @@ export default function PlatformKeyCard({
   };
 
   return (
-    <div className="relative overflow-hidden p-6 rounded-2xl bg-white dark:bg-white/5 border border-zinc-200 dark:border-white/10 shadow-sm flex flex-col justify-between">
-      <div className="pointer-events-none absolute top-0 right-0 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl -mr-10 -mt-10"></div>
+    <div className="relative rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-white/5">
+      <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-[inherit]">
+        <div className="absolute right-0 top-0 h-32 w-32 -mr-10 -mt-10 rounded-full bg-purple-500/10 blur-2xl"></div>
+      </div>
+      <div className="flex min-h-full flex-col justify-between">
       <div className="relative z-10 flex justify-between items-center">
         <div className="mb-2 flex items-center gap-1.5">
           <h3 className="text-sm font-medium text-zinc-500 dark:text-zinc-400">{label}</h3>
@@ -109,6 +112,7 @@ export default function PlatformKeyCard({
         >
           {copied ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
         </button>
+      </div>
       </div>
     </div>
   );
