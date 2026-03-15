@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { Check, Copy, RefreshCw } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export default function PlatformKeyCard({
   platformKey,
@@ -18,11 +19,16 @@ export default function PlatformKeyCard({
   confirmResetText: string;
   label: string;
 }) {
+  const router = useRouter();
   const [copied, setCopied] = useState(false);
   const [displayedKey, setDisplayedKey] = useState(platformKey);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [isPending, startTransition] = useTransition();
+
+  useEffect(() => {
+    setDisplayedKey(platformKey);
+  }, [platformKey]);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(displayedKey);
@@ -31,10 +37,6 @@ export default function PlatformKeyCard({
   };
 
   const handleReset = () => {
-    if (!window.confirm(confirmResetText)) {
-      return;
-    }
-
     setError(null);
     setSuccess(false);
 
@@ -42,21 +44,25 @@ export default function PlatformKeyCard({
       try {
         const response = await fetch("/api/user/platform-key/reset", {
           method: "POST",
+          credentials: "same-origin",
         });
 
-        const result = (await response.json()) as {
-          success?: boolean;
-          newKey?: string;
-          error?: string;
-        };
+        const result = (response.headers.get("content-type")?.includes("application/json")
+          ? await response.json()
+          : null) as {
+            success?: boolean;
+            newKey?: string;
+            error?: string;
+          } | null;
 
-        if (!response.ok || !result.success || !result.newKey) {
-          setError(result.error || "Reset failed");
+        if (!response.ok || !result?.success || !result.newKey) {
+          setError(result?.error || "Reset failed");
           return;
         }
 
         setDisplayedKey(result.newKey);
         setSuccess(true);
+        router.refresh();
       } catch {
         setError("Reset failed");
       }
@@ -71,6 +77,7 @@ export default function PlatformKeyCard({
         <button
           type="button"
           onClick={handleReset}
+          title={confirmResetText}
           disabled={isPending}
           className="text-xs px-2 py-1 rounded-lg transition-all flex items-center gap-1 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-white/10 disabled:opacity-60"
         >
