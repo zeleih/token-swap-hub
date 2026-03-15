@@ -1,0 +1,107 @@
+import { prisma } from "@/lib/prisma";
+import { verifySession } from "@/lib/session";
+import DashboardCopyKey from "./components/DashboardCopyKey";
+import AddTokenForm from "./components/AddTokenForm";
+import TokenList from "./components/TokenList";
+import { getTranslations } from "next-intl/server";
+
+export default async function DashboardPage() {
+  const session = await verifySession();
+  const userId = session!.userId;
+  const t = await getTranslations("Dashboard");
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    include: {
+      providedTokens: true,
+      requestsMade: {
+        take: 5,
+        orderBy: { createdAt: "desc" }
+      }
+    }
+  });
+
+  if (!user) return null;
+
+  return (
+    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      
+      {/* Top Banner: Credits & Platform Key */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        
+        {/* Credits Card */}
+        <div className="relative overflow-hidden p-6 rounded-2xl bg-white dark:bg-white/5 border border-zinc-200 dark:border-white/10 shadow-sm">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-2xl -mr-10 -mt-10"></div>
+          <h3 className="text-sm font-medium text-zinc-500 dark:text-zinc-400 mb-2">{t("points")}</h3>
+          <div className="flex items-baseline gap-2">
+            <span className="text-4xl font-bold tracking-tight text-zinc-900 dark:text-white">
+              {user.points.toLocaleString()}
+            </span>
+            <span className="text-sm font-medium text-zinc-500 dark:text-zinc-400">{t("pointsUnit")}</span>
+          </div>
+        </div>
+
+        {/* Platform Key Card */}
+        <div className="relative overflow-hidden p-6 rounded-2xl bg-white dark:bg-white/5 border border-zinc-200 dark:border-white/10 shadow-sm flex flex-col justify-between">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl -mr-10 -mt-10"></div>
+          <h3 className="text-sm font-medium text-zinc-500 dark:text-zinc-400 mb-2">{t("platformKey")}</h3>
+          <DashboardCopyKey platformKey={user.platformKey} copyText={t("copy")} />
+          <p className="text-xs text-zinc-400 mt-2">
+            {t("platformKeyTip")}
+          </p>
+        </div>
+
+      </div>
+
+      {/* Grid for Shared Tokens and Logs */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <div className="lg:col-span-2 space-y-6">
+          <div className="bg-white dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-2xl p-6 shadow-sm">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-semibold text-zinc-900 dark:text-white">{t("yourTokens")}</h3>
+            </div>
+            <TokenList
+              tokens={user.providedTokens}
+              noTokensText={t("noTokens")}
+              contributedText={t("contributed")}
+              revokeText={t("revoke")}
+              confirmRevokeText={t("confirmRevoke")}
+            />
+          </div>
+
+          <div className="bg-white dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-2xl p-6 shadow-sm">
+            <h3 className="text-xl font-semibold text-zinc-900 dark:text-white mb-6">{t("usage")}</h3>
+            {user.requestsMade.length === 0 ? (
+              <p className="text-sm text-zinc-500">{t("noLogs")}</p>
+            ) : (
+              <ul className="divide-y divide-zinc-200 dark:divide-white/10">
+                {user.requestsMade.map((req: any) => (
+                  <li key={req.id} className="py-3 flex justify-between items-center text-sm">
+                    <span className="text-zinc-600 dark:text-zinc-300">{t("spent", { count: req.tokensUsed })}</span>
+                    <span className={`px-2 py-1 rounded text-xs font-medium ${req.status === 'SUCCESS' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500'}`}>
+                      {req.status}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </div>
+
+        <div className="lg:col-span-1">
+           <AddTokenForm
+             title={t("addToken")}
+             platformLabel={t("platform")}
+             apiKeyLabel={t("apiKey")}
+             submitText={t("submitToken")}
+             validatingText={t("validating")}
+             tokenAddedText={t("tokenAdded")}
+           />
+        </div>
+
+      </div>
+
+    </div>
+  );
+}

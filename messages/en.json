@@ -1,0 +1,47 @@
+{
+  "Index": {
+    "title": "Token Swap Hub",
+    "subtitle": "Share idle tokens, earn credits, and consume collective AI power.",
+    "login": "Login",
+    "register": "Register with invite code"
+  },
+  "Auth": {
+    "inviteCode": "Invite Code",
+    "email": "Email Address",
+    "password": "Password",
+    "submit": "Continue",
+    "registerTitle": "Register",
+    "loginTitle": "Login",
+    "back": "← Back",
+    "loading_register": "Configuring...",
+    "loading_login": "Entering...",
+    "hasAccount": "Already have an account?",
+    "loginLink": "Login",
+    "noAccount": "New to the hub?",
+    "registerLink": "Register via invite",
+    "invitePlaceholder": "e.g. EARLYBIRD"
+  },
+  "Dashboard": {
+    "title": "Dashboard",
+    "logout": "Logout",
+    "points": "Credits",
+    "pointsUnit": "pts",
+    "yourTokens": "Tokens Provided",
+    "addToken": "Add Token",
+    "usage": "Usage Log",
+    "platformKey": "Your Platform Key",
+    "platformKeyTip": "Use this key as your Bearer token and the platform URL as the base URL.",
+    "copy": "Copy",
+    "noLogs": "No usage logs yet.",
+    "spent": "Spent {count} tokens",
+    "noTokens": "You haven't provided any tokens yet.",
+    "contributed": "tkns contributed",
+    "revoke": "Revoke",
+    "confirmRevoke": "Are you sure you want to stop sharing this token?",
+    "platform": "Platform",
+    "apiKey": "API Key",
+    "submitToken": "Submit Token",
+    "validating": "Validating & Adding...",
+    "tokenAdded": "Token added securely!"
+  }
+}

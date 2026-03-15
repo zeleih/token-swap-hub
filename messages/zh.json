@@ -1,0 +1,47 @@
+{
+  "Index": {
+    "title": "Token 抽水蓄能与共享",
+    "subtitle": "共享闲置的 Token 赚取点数，或者消耗点数使用大家共享的 AI 能力。",
+    "login": "登录",
+    "register": "使用邀请码注册"
+  },
+  "Auth": {
+    "inviteCode": "邀请码",
+    "email": "邮箱地址",
+    "password": "密码",
+    "submit": "确认",
+    "registerTitle": "注册",
+    "loginTitle": "登录",
+    "back": "← 返回",
+    "loading_register": "正在配置...",
+    "loading_login": "正在登录...",
+    "hasAccount": "已有帐号？",
+    "loginLink": "去登录",
+    "noAccount": "没有帐号？",
+    "registerLink": "通过邀请码注册",
+    "invitePlaceholder": "例如 EARLYBIRD"
+  },
+  "Dashboard": {
+    "title": "控制台",
+    "logout": "退出登录",
+    "points": "信用点数",
+    "pointsUnit": "pts",
+    "yourTokens": "提供的 Token",
+    "addToken": "添加 Token",
+    "usage": "使用记录",
+    "platformKey": "平台专用 Key",
+    "platformKeyTip": "将此 Key 作为 Bearer token，平台 URL 作为 base URL 填写至您的 AI 客户端。",
+    "copy": "复制",
+    "noLogs": "暂无使用记录。",
+    "spent": "消耗了 {count} 个 tokens",
+    "noTokens": "您还没有提供任何 Token。",
+    "contributed": "已贡献 tokens",
+    "revoke": "撤销",
+    "confirmRevoke": "确定要停止共享该 Token 吗？",
+    "platform": "平台",
+    "apiKey": "API Key",
+    "submitToken": "提交 Token",
+    "validating": "正在验证并添加...",
+    "tokenAdded": "Token 已安全添加！"
+  }
+}
