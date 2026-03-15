@@ -344,7 +344,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
         <>
           <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
             <div className="relative overflow-hidden rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-white/5">
-              <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-blue-500/10 blur-2xl" />
+              <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-blue-500/10 blur-2xl" />
               <h3 className="mb-2 text-sm font-medium text-zinc-500 dark:text-zinc-400">
                 {t("points")}
               </h3>
@@ -368,7 +368,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
             />
 
             <div className="relative flex flex-col justify-between overflow-hidden rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-white/5">
-              <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-emerald-500/10 blur-2xl" />
+              <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-emerald-500/10 blur-2xl" />
               <h3 className="mb-2 text-sm font-medium text-zinc-500 dark:text-zinc-400">
                 {t("platformUrl")}
               </h3>
@@ -506,7 +506,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
         <div className="space-y-6">
           <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
             <div className="relative overflow-hidden rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-white/5">
-              <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-blue-500/10 blur-2xl" />
+              <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-blue-500/10 blur-2xl" />
               <h3 className="mb-2 text-sm font-medium text-zinc-500 dark:text-zinc-400">
                 {t("points")}
               </h3>

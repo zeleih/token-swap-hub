@@ -71,8 +71,8 @@ export default function PlatformKeyCard({
 
   return (
     <div className="relative overflow-hidden p-6 rounded-2xl bg-white dark:bg-white/5 border border-zinc-200 dark:border-white/10 shadow-sm flex flex-col justify-between">
-      <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl -mr-10 -mt-10"></div>
-      <div className="flex justify-between items-center">
+      <div className="pointer-events-none absolute top-0 right-0 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl -mr-10 -mt-10"></div>
+      <div className="relative z-10 flex justify-between items-center">
         <h3 className="text-sm font-medium text-zinc-500 dark:text-zinc-400 mb-2">{label}</h3>
         <button
           type="button"
@@ -91,7 +91,7 @@ export default function PlatformKeyCard({
       {success && (
         <p className="mt-2 text-xs text-emerald-500">{resetDoneText}</p>
       )}
-      <div className="flex items-center gap-2 mt-4 bg-black/5 dark:bg-black/40 p-1.5 rounded-xl border border-zinc-200 dark:border-white/10">
+      <div className="relative z-10 flex items-center gap-2 mt-4 bg-black/5 dark:bg-black/40 p-1.5 rounded-xl border border-zinc-200 dark:border-white/10">
         <code className="text-sm font-mono flex-1 px-3 text-zinc-800 dark:text-zinc-200 truncate">
           {displayedKey}
         </code>
