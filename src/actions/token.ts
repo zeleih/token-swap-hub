@@ -15,6 +15,7 @@ export async function addTokenAction(prevState: FormState | undefined, formData:
   const key = formData.get("key") as string;
   const creditLimitStr = formData.get("creditLimit") as string;
   const allowedUsers = formData.get("allowedUsers") as string;
+  const customProviderName = formData.get("customProviderName") as string;
   const customBaseUrl = formData.get("customBaseUrl") as string;
   const customModelsConfigRaw = formData.get("customModelsConfig") as string;
 
@@ -37,8 +38,14 @@ export async function addTokenAction(prevState: FormState | undefined, formData:
 
   let normalizedCustomBaseUrl: string | null = null;
   let customModelsConfig: string | null = null;
+  let normalizedCustomProviderName: string | null = null;
 
   if (provider === "custom") {
+    normalizedCustomProviderName = customProviderName?.trim() || null;
+    if (!normalizedCustomProviderName) {
+      return { error: "请填写自定义平台名称" };
+    }
+
     normalizedCustomBaseUrl = normalizeBaseUrl(customBaseUrl || "");
     if (!/^https?:\/\//i.test(normalizedCustomBaseUrl)) {
       return { error: "自定义平台 URL 必须以 http:// 或 https:// 开头" };
@@ -59,6 +66,7 @@ export async function addTokenAction(prevState: FormState | undefined, formData:
       userId: session.userId,
       status: "ACTIVE",
       creditLimit,
+      customProviderName: normalizedCustomProviderName,
       customBaseUrl: normalizedCustomBaseUrl,
       customModelsConfig,
       allowedUsers: allowedUsers?.trim() || null

@@ -33,6 +33,8 @@ export default function AddTokenForm({
   allowedUsersLabel,
   allowedUsersPlaceholder,
   allowedUsersTip,
+  customProviderNameLabel,
+  customProviderNamePlaceholder,
   customBaseUrlLabel,
   customBaseUrlPlaceholder,
   customModelsTitle,
@@ -55,6 +57,8 @@ export default function AddTokenForm({
   allowedUsersLabel: string;
   allowedUsersPlaceholder: string;
   allowedUsersTip: string;
+  customProviderNameLabel: string;
+  customProviderNamePlaceholder: string;
   customBaseUrlLabel: string;
   customBaseUrlPlaceholder: string;
   customModelsTitle: string;
@@ -88,6 +92,8 @@ export default function AddTokenForm({
         allowedUsersLabel={allowedUsersLabel}
         allowedUsersPlaceholder={allowedUsersPlaceholder}
         allowedUsersTip={allowedUsersTip}
+        customProviderNameLabel={customProviderNameLabel}
+        customProviderNamePlaceholder={customProviderNamePlaceholder}
         customBaseUrlLabel={customBaseUrlLabel}
         customBaseUrlPlaceholder={customBaseUrlPlaceholder}
         customModelsTitle={customModelsTitle}
@@ -117,6 +123,8 @@ function FormBody({
   allowedUsersLabel,
   allowedUsersPlaceholder,
   allowedUsersTip,
+  customProviderNameLabel,
+  customProviderNamePlaceholder,
   customBaseUrlLabel,
   customBaseUrlPlaceholder,
   customModelsTitle,
@@ -141,6 +149,8 @@ function FormBody({
   allowedUsersLabel: string;
   allowedUsersPlaceholder: string;
   allowedUsersTip: string;
+  customProviderNameLabel: string;
+  customProviderNamePlaceholder: string;
   customBaseUrlLabel: string;
   customBaseUrlPlaceholder: string;
   customModelsTitle: string;
@@ -213,6 +223,17 @@ function FormBody({
 
         {provider === "custom" && (
           <>
+            <div>
+              <label className="block text-sm font-medium text-zinc-500 dark:text-zinc-400 mb-2">{customProviderNameLabel}</label>
+              <input
+                name="customProviderName"
+                required
+                type="text"
+                className="w-full px-4 py-3 bg-zinc-50 dark:bg-black/40 border border-zinc-200 dark:border-white/10 rounded-xl text-zinc-900 dark:text-white outline-none focus:border-blue-500/50 placeholder-zinc-400 dark:placeholder-zinc-600"
+                placeholder={customProviderNamePlaceholder}
+              />
+            </div>
+
             <div>
               <label className="block text-sm font-medium text-zinc-500 dark:text-zinc-400 mb-2">{customBaseUrlLabel}</label>
               <input
@@ -332,6 +353,7 @@ function FormBody({
 
         {provider !== "custom" && (
           <>
+            <input type="hidden" name="customProviderName" value="" />
             <input type="hidden" name="customBaseUrl" value="" />
             <input type="hidden" name="customModelsConfig" value="" />
           </>

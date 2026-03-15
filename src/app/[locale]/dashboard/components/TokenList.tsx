@@ -7,10 +7,12 @@ type TokenItem = {
   id: string;
   key: string;
   provider: string;
+  providerLabel: string;
   status: string;
   totalUsedTokens: number;
   usedCredits: number;
   creditLimit: number | null;
+  customProviderName: string | null;
   customBaseUrl: string | null;
   customModelsConfig: string | null;
   allowedUsers: string | null;
@@ -86,10 +88,12 @@ export default function TokenList({
   const [statusFilter, setStatusFilter] = useState("all");
   const [page, setPage] = useState(1);
 
-  const providers = Array.from(new Set(tokens.map((token) => token.provider))).sort();
+  const providers = Array.from(new Set(tokens.map((token) => token.providerLabel))).sort((a, b) =>
+    a.localeCompare(b)
+  );
 
   const filteredTokens = tokens.filter((token) => {
-    const providerMatched = providerFilter === "all" || token.provider === providerFilter;
+    const providerMatched = providerFilter === "all" || token.providerLabel === providerFilter;
     const statusMatched = statusFilter === "all" || token.status === statusFilter;
     return providerMatched && statusMatched;
   });
@@ -130,9 +134,9 @@ export default function TokenList({
             className="rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 text-zinc-900 outline-none dark:border-white/10 dark:bg-black/30 dark:text-white"
           >
             <option value="all">{allProvidersText}</option>
-            {providers.map((provider) => (
-              <option key={provider} value={provider}>
-                {provider}
+            {providers.map((providerLabel) => (
+              <option key={providerLabel} value={providerLabel}>
+                {providerLabel}
               </option>
             ))}
           </select>
@@ -182,9 +186,14 @@ export default function TokenList({
                   <div className="mb-3 flex items-start justify-between">
                     <div>
                       <div className="flex flex-wrap items-center gap-1.5">
-                        <span className="rounded bg-blue-500/10 px-2 py-1 text-xs font-semibold uppercase tracking-wider text-blue-600 dark:text-blue-400">
-                          {token.provider}
+                        <span className="rounded bg-blue-500/10 px-2 py-1 text-xs font-semibold text-blue-600 dark:text-blue-400">
+                          {token.providerLabel}
                         </span>
+                        {token.provider !== "openai" && token.provider === "custom" && (
+                          <span className="rounded bg-zinc-200/70 px-2 py-1 text-[11px] font-medium text-zinc-600 dark:bg-white/10 dark:text-zinc-300">
+                            Custom
+                          </span>
+                        )}
                         {token.allowedUsers && (
                           <span className="rounded bg-cyan-500/10 px-2 py-0.5 text-xs font-medium text-cyan-600 dark:text-cyan-400">
                             [{directedBadge}]

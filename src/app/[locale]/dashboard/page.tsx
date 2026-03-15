@@ -15,6 +15,7 @@ import {
 import { refreshPricingAction } from "@/actions/pricing";
 import { Link } from "@/i18n/routing";
 import { redirect } from "next/navigation";
+import { parseCustomModelsConfig } from "@/lib/custom-models";
 
 type UsageLogType = "usage" | "provided" | "directedUsage" | "directedProvided";
 
@@ -39,6 +40,34 @@ type DashboardLog = {
   };
 };
 
+type AccessibleToken = {
+  id: string;
+  provider: string;
+  isAdminSupply: boolean;
+  usedCredits: number;
+  creditLimit: number | null;
+  customProviderName: string | null;
+  customBaseUrl: string | null;
+  customModelsConfig: string | null;
+  allowedUsers: string | null;
+  userId: string;
+  user: {
+    username: string;
+  };
+};
+
+type AvailableModelGroup = {
+  id: string;
+  providerLabel: string;
+  helperText: string | null;
+  models: Array<{
+    id: string;
+    name: string;
+    inputPricePerM: number | null;
+    outputPricePerM: number | null;
+  }>;
+};
+
 type PageProps = {
   searchParams?: Promise<{
     tab?: string | string[];
@@ -48,6 +77,29 @@ type PageProps = {
 function resolveTab(tab?: string | string[]) {
   const value = Array.isArray(tab) ? tab[0] : tab;
   return value === "contribution" ? "contribution" : "usage";
+}
+
+function getProviderLabel(token: {
+  provider: string;
+  customProviderName?: string | null;
+  customBaseUrl?: string | null;
+}) {
+  if (token.provider === "openai") {
+    return "OpenAI";
+  }
+
+  return token.customProviderName?.trim() || token.customBaseUrl?.trim() || "Custom";
+}
+
+function formatPricePerM(value: number | null) {
+  if (value === null) {
+    return "--";
+  }
+
+  return `$${value.toLocaleString(undefined, {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  })}`;
 }
 
 export default async function DashboardPage({ searchParams }: PageProps) {
@@ -79,6 +131,110 @@ export default async function DashboardPage({ searchParams }: PageProps) {
   if (!user) {
     redirect(`/${locale}/login`);
   }
+
+  const allActiveTokens = await prisma.tokenKey.findMany({
+    where: { status: "ACTIVE" },
+    include: {
+      user: {
+        select: {
+          username: true,
+        },
+      },
+    },
+  });
+
+  const accessibleTokens = (allActiveTokens as AccessibleToken[]).filter((token) => {
+    if (!["openai", "custom"].includes(token.provider)) {
+      return false;
+    }
+
+    if (token.creditLimit !== null && token.usedCredits >= token.creditLimit) {
+      return false;
+    }
+
+    if (token.provider === "custom" && (!token.customBaseUrl || !token.customModelsConfig)) {
+      return false;
+    }
+
+    if (token.userId === userId) {
+      return true;
+    }
+
+    if (token.isAdminSupply) {
+      return true;
+    }
+
+    if (token.allowedUsers) {
+      const allowed = token.allowedUsers.split(",").map((entry) => entry.trim().toLowerCase());
+      return allowed.includes(user.username.toLowerCase());
+    }
+
+    return false;
+  });
+
+  const pricingSnapshots = await prisma.modelPriceSnapshot.findMany({
+    orderBy: [{ provider: "asc" }, { model: "asc" }],
+  });
+
+  const availableModelGroups: AvailableModelGroup[] = [];
+  const hasOpenAiAccess = accessibleTokens.some((token) => token.provider === "openai");
+
+  if (hasOpenAiAccess) {
+    availableModelGroups.push({
+      id: "openai",
+      providerLabel: "OpenAI",
+      helperText: null,
+      models: pricingSnapshots
+        .filter((snapshot) => snapshot.provider === "openai")
+        .map((snapshot) => ({
+          id: snapshot.model,
+          name: snapshot.displayName,
+          inputPricePerM: snapshot.inputPricePerM,
+          outputPricePerM: snapshot.outputPricePerM,
+        })),
+    });
+  }
+
+  const customGroups = new Map<string, AvailableModelGroup>();
+
+  for (const token of accessibleTokens) {
+    if (token.provider !== "custom" || !token.customModelsConfig) {
+      continue;
+    }
+
+    const groupId = `${getProviderLabel(token)}::${token.customBaseUrl || token.id}`;
+    const existingGroup = customGroups.get(groupId) ?? {
+      id: groupId,
+      providerLabel: getProviderLabel(token),
+      helperText: token.customBaseUrl,
+      models: [],
+    };
+
+    const existingModelIds = new Set(existingGroup.models.map((model) => model.id.toLowerCase()));
+    for (const model of parseCustomModelsConfig(token.customModelsConfig)) {
+      if (existingModelIds.has(model.id.toLowerCase())) {
+        continue;
+      }
+
+      existingGroup.models.push({
+        id: model.id,
+        name: model.name,
+        inputPricePerM: model.inputPricePerM,
+        outputPricePerM: model.outputPricePerM,
+      });
+      existingModelIds.add(model.id.toLowerCase());
+    }
+
+    customGroups.set(groupId, existingGroup);
+  }
+
+  availableModelGroups.push(...Array.from(customGroups.values()));
+  const availableModelCount = availableModelGroups.reduce((sum, group) => sum + group.models.length, 0);
+
+  const providedTokens = user.providedTokens.map((token) => ({
+    ...token,
+    providerLabel: getProviderLabel(token),
+  }));
 
   const recentLogs = await prisma.requestLog.findMany({
     where: {
@@ -221,10 +377,99 @@ export default async function DashboardPage({ searchParams }: PageProps) {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-white/5">
-            <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <h3 className="text-xl font-semibold text-zinc-900 dark:text-white">
+            <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-white/5">
+              <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <h3 className="text-xl font-semibold text-zinc-900 dark:text-white">
+                    {t("availableModelsTitle")}
+                  </h3>
+                  <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+                    {t("availableModelsSubtitle")}
+                  </p>
+                </div>
+                <div className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                  availableModelCount > 0
+                    ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                    : "bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                }`}>
+                  {availableModelCount > 0 ? t("availableModelsOnline") : t("availableModelsOffline")}
+                </div>
+              </div>
+
+              {availableModelCount > 0 ? (
+                <div className="space-y-4">
+                  <div className="flex flex-wrap gap-3 text-xs text-zinc-500 dark:text-zinc-400">
+                    <span className="rounded-full bg-zinc-100 px-3 py-1 dark:bg-white/10">
+                      {t("availableSourcesSummary", { count: availableModelGroups.length })}
+                    </span>
+                    <span className="rounded-full bg-zinc-100 px-3 py-1 dark:bg-white/10">
+                      {t("availableModelsSummary", { count: availableModelCount })}
+                    </span>
+                  </div>
+
+                  <div className="grid gap-4 xl:grid-cols-2">
+                    {availableModelGroups.map((group) => (
+                      <div
+                        key={group.id}
+                        className="rounded-2xl border border-zinc-200 bg-zinc-50/70 p-4 dark:border-white/10 dark:bg-black/20"
+                      >
+                        <div className="mb-3">
+                          <h4 className="text-sm font-semibold text-zinc-900 dark:text-white">
+                            {group.providerLabel}
+                          </h4>
+                          {group.helperText && (
+                            <p className="mt-1 truncate text-xs text-zinc-500 dark:text-zinc-400">
+                              {group.helperText}
+                            </p>
+                          )}
+                        </div>
+
+                        <div className="space-y-2">
+                          {group.models.map((model) => (
+                            <div
+                              key={`${group.id}-${model.id}`}
+                              className="rounded-xl border border-zinc-200 bg-white px-3 py-3 dark:border-white/10 dark:bg-white/5"
+                            >
+                              <div className="flex flex-wrap items-start justify-between gap-3">
+                                <div className="min-w-0">
+                                  <p className="truncate text-sm font-medium text-zinc-900 dark:text-white">
+                                    {model.name}
+                                  </p>
+                                  <p className="mt-1 truncate text-xs text-zinc-500 dark:text-zinc-400">
+                                    {model.id}
+                                  </p>
+                                </div>
+                                <div className="text-right text-[11px] text-zinc-500 dark:text-zinc-400">
+                                  <p>
+                                    {t("availableModelInputPrice", {
+                                      price: formatPricePerM(model.inputPricePerM),
+                                    })}
+                                  </p>
+                                  <p className="mt-1">
+                                    {t("availableModelOutputPrice", {
+                                      price: formatPricePerM(model.outputPricePerM),
+                                    })}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="rounded-2xl border border-dashed border-zinc-200 px-4 py-8 text-sm text-zinc-500 dark:border-white/10 dark:text-zinc-400">
+                  {t("noAvailableModels")}
+                </div>
+              )}
+            </div>
+
+            <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-white/5">
+              <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <h3 className="text-xl font-semibold text-zinc-900 dark:text-white">
                   {t("usageRecordsTitle")}
                 </h3>
                 <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
@@ -284,7 +529,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
               </h3>
               <div className="min-h-[20rem] max-h-[34rem] resize-y overflow-y-auto pr-2">
                 <TokenList
-                  tokens={user.providedTokens}
+                  tokens={providedTokens}
                   noTokensText={t("noTokens")}
                   contributedText={t("contributed")}
                   revokeText={t("revoke")}
@@ -340,6 +585,8 @@ export default async function DashboardPage({ searchParams }: PageProps) {
               allowedUsersLabel={t("allowedUsers")}
               allowedUsersPlaceholder={t("allowedUsersPlaceholder")}
               allowedUsersTip={t("allowedUsersTip")}
+              customProviderNameLabel={t("customProviderName")}
+              customProviderNamePlaceholder={t("customProviderNamePlaceholder")}
               customBaseUrlLabel={t("customBaseUrl")}
               customBaseUrlPlaceholder={t("customBaseUrlPlaceholder")}
               customModelsTitle={t("customModels")}
