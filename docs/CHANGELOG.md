@@ -1,9 +1,24 @@
 # 更新日志 — Token 共享平台
 
+## v5 — 2026-03-15
+
+### 新增功能
+- ✅ **Dashboard 语言切换**: 导航栏新增 EN/中 按钮，一键切换中英文界面
+
+### Bug 修复
+- ✅ **提供商修正**: Groq → xAI Grok（`api.x.ai/v1`，前缀 `xai-`）
+
+### 改进
+- ✅ **使用记录合并**: 移除独立"定向使用记录"区块，合并到主记录中用蓝色 [定向] 标签区分
+- ✅ **Token 源改名**: "提供的 Token" → "提供的 Token 源"，"添加 Token" → "添加 Token 源"
+- ✅ **定向 Token 标注**: Token 源卡片中定向开放的 Token 显示青色 [定向] 标签
+
+---
+
 ## v4 — 2026-03-15
 
 ### 新增功能
-- ✅ **多平台支持**: OpenAI / DeepSeek / 智谱 GLM / Moonshot / 通义千问 / Claude / Gemini / Groq / Mistral / 自定义
+- ✅ **多平台支持**: OpenAI / DeepSeek / 智谱 GLM / Moonshot / 通义千问 / Claude / Gemini / Grok / Mistral / 自定义
 - ✅ **Token 暂停开关**: 用户可暂停/恢复 Token 共享，PAUSED 状态不会被代理选中
 - ✅ **Token 用量展示**: 进度条显示已用量 / 上限，无限制时标注"无限制"
 - ✅ **公告更新**: 测试阶段提示 + Bug 赏金邮箱 (hhuhzl@outlook.com)
