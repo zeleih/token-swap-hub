@@ -33,18 +33,33 @@ async function handleProxy(req: NextRequest, params: { path: string[] }) {
     return NextResponse.json({ error: "Insufficient points. Earn more by sharing tokens!" }, { status: 402 });
   }
 
-  // Pick a provider Token
-  // We prioritize tokens mapping to users other than consumer, or fallback
-  const availableTokens = await prisma.tokenKey.findMany({
-    where: { status: "ACTIVE" }
+  // Pick a provider Token with filtering
+  const allActiveTokens = await prisma.tokenKey.findMany({
+    where: { status: "ACTIVE" },
+    include: { user: { select: { username: true } } }
+  });
+
+  // Filter: skip tokens that hit usage limit or not in allowedUsers whitelist
+  const consumer_username = (consumer as any).username;
+  const availableTokens = allActiveTokens.filter((token: any) => {
+    // Check usage limit
+    if (token.usageLimit !== null && token.totalUsedTokens >= token.usageLimit) return false;
+    // Check allowed users whitelist
+    if (token.allowedUsers) {
+      const allowed = token.allowedUsers.split(",").map((u: string) => u.trim().toLowerCase());
+      if (!allowed.includes(consumer_username.toLowerCase())) return false;
+    }
+    return true;
   });
 
   if (availableTokens.length === 0) {
     return NextResponse.json({ error: "No active tokens available in the pool." }, { status: 503 });
   }
 
-  // Simple random picking for MVP
+  // Simple random picking
   const chosenToken = availableTokens[Math.floor(Math.random() * availableTokens.length)];
+  // 定向开放的 Token（有白名单）不赚取信用点数
+  const isDirected = !!chosenToken.allowedUsers;
 
   // Reconstruct target URL
   const targetUrl = new URL(req.url);
@@ -122,7 +137,7 @@ async function handleProxy(req: NextRequest, params: { path: string[] }) {
       },
       flush(controller) {
         // Record billing when stream ends
-        commitBilling(consumer.id, chosenToken.id, chosenToken.userId, finalTokensUsed, chosenToken.isAdminSupply);
+        commitBilling(consumer.id, chosenToken.id, chosenToken.userId, finalTokensUsed, chosenToken.isAdminSupply, isDirected);
       }
     });
 
@@ -141,7 +156,7 @@ async function handleProxy(req: NextRequest, params: { path: string[] }) {
     } catch (e) {}
 
     // Record billing directly
-    commitBilling(consumer.id, chosenToken.id, chosenToken.userId, finalTokensUsed, chosenToken.isAdminSupply);
+    commitBilling(consumer.id, chosenToken.id, chosenToken.userId, finalTokensUsed, chosenToken.isAdminSupply, isDirected);
 
     return new NextResponse(bodyStr, {
       status: upstreamRes.status,
@@ -150,35 +165,33 @@ async function handleProxy(req: NextRequest, params: { path: string[] }) {
   }
 }
 
-async function commitBilling(consumerId: string, tokenId: string, providerId: string, tokensUsed: number, isAdminSupply: boolean) {
+async function commitBilling(consumerId: string, tokenId: string, providerId: string, tokensUsed: number, isAdminSupply: boolean, isDirected: boolean) {
   if (tokensUsed <= 0) return;
+  // 定向 Token 或管理员供应的 Token 不给提供者积分
+  const shouldRewardProvider = !isAdminSupply && !isDirected;
 
-  await prisma.$transaction([
-    // Deduct consumer points
+  const ops: any[] = [
     prisma.user.update({
       where: { id: consumerId },
       data: { points: { decrement: tokensUsed } }
     }),
-    // Reward provider points (if not admin supply)
-    ...(isAdminSupply ? [] : [
-      prisma.user.update({
-        where: { id: providerId },
-        data: { points: { increment: tokensUsed } }
-      })
-    ]),
-    // Update token usage stat
     prisma.tokenKey.update({
       where: { id: tokenId },
       data: { totalUsedTokens: { increment: tokensUsed } }
     }),
-    // Log the request
     prisma.requestLog.create({
-      data: {
-        consumerId,
-        tokenId,
-        tokensUsed,
-        status: "SUCCESS"
-      }
+      data: { consumerId, tokenId, tokensUsed, status: "SUCCESS" }
     })
-  ]).catch((e: any) => console.error("Billing commit failed: ", e));
+  ];
+
+  if (shouldRewardProvider) {
+    ops.push(
+      prisma.user.update({
+        where: { id: providerId },
+        data: { points: { increment: tokensUsed } }
+      })
+    );
+  }
+
+  await prisma.$transaction(ops).catch((e: any) => console.error("Billing commit failed: ", e));
 }

@@ -10,6 +10,8 @@ export default async function DashboardPage() {
   const userId = session!.userId;
   const t = await getTranslations("Dashboard");
 
+  const platformUrl = process.env.PLATFORM_URL || "http://localhost:3000/api/v1";
+
   const user = await prisma.user.findUnique({
     where: { id: userId },
     include: {
@@ -26,8 +28,8 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       
-      {/* Top Banner: Credits & Platform Key */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* Top Banner: Credits & Platform Key & URL */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         
         {/* Credits Card */}
         <div className="relative overflow-hidden p-6 rounded-2xl bg-white dark:bg-white/5 border border-zinc-200 dark:border-white/10 shadow-sm">
@@ -46,9 +48,14 @@ export default async function DashboardPage() {
           <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl -mr-10 -mt-10"></div>
           <h3 className="text-sm font-medium text-zinc-500 dark:text-zinc-400 mb-2">{t("platformKey")}</h3>
           <DashboardCopyKey platformKey={user.platformKey} copyText={t("copy")} />
-          <p className="text-xs text-zinc-400 mt-2">
-            {t("platformKeyTip")}
-          </p>
+        </div>
+
+        {/* Platform URL Card */}
+        <div className="relative overflow-hidden p-6 rounded-2xl bg-white dark:bg-white/5 border border-zinc-200 dark:border-white/10 shadow-sm flex flex-col justify-between">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl -mr-10 -mt-10"></div>
+          <h3 className="text-sm font-medium text-zinc-500 dark:text-zinc-400 mb-2">{t("platformUrl")}</h3>
+          <DashboardCopyKey platformKey={platformUrl} copyText={t("copy")} />
+          <p className="text-xs text-zinc-400 mt-2">{t("platformKeyTip")}</p>
         </div>
 
       </div>
@@ -97,6 +104,14 @@ export default async function DashboardPage() {
              submitText={t("submitToken")}
              validatingText={t("validating")}
              tokenAddedText={t("tokenAdded")}
+             usageLimitLabel={t("usageLimit")}
+             usageLimitPlaceholder={t("usageLimitPlaceholder")}
+             allowedUsersLabel={t("allowedUsers")}
+             allowedUsersPlaceholder={t("allowedUsersPlaceholder")}
+             allowedUsersTip={t("allowedUsersTip")}
+             oauthTab={t("oauthTab")}
+             manualTab={t("manualTab")}
+             oauthComingSoon={t("oauthComingSoon")}
            />
         </div>
 

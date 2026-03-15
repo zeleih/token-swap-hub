@@ -1,27 +1,22 @@
 import { PrismaClient } from "@prisma/client";
 
-const prisma = new PrismaClient({
-  datasources: {
-    db: {
-      url: "file:./dev.db",
-    },
-  },
-});
+const prisma = new PrismaClient();
 
 async function main() {
   const code = "EARLYBIRD";
   
-  // Create an admin user to own the invite code if we have to, or just create it
-  let sysAdmin = await prisma.user.findFirst({ where: { email: "admin@system.local" }});
+  let sysAdmin = await prisma.user.findFirst({ where: { username: "admin" }});
   
   if (!sysAdmin) {
      sysAdmin = await prisma.user.create({
        data: {
-         email: "admin@system.local",
-         passwordHash: "fake_hash", // Admin shouldn't just log in without config
+         username: "admin",
+         displayName: "系统管理员",
+         passwordHash: "fake_hash",
          role: "ADMIN",
          platformKey: "tk_admin_system_key",
-         points: 999999
+         points: 999999,
+         showOnLeaderboard: false
        }
      });
   }
@@ -35,9 +30,9 @@ async function main() {
         creatorId: sysAdmin.id
       }
     });
-    console.log(`Invite code generated: ${code}`);
+    console.log(`邀请码已生成: ${code}`);
   } else {
-    console.log(`Invite code already exists.`);
+    console.log(`邀请码已存在。`);
   }
 }
 

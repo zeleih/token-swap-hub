@@ -10,26 +10,30 @@ export async function addTokenAction(prevState: any, formData: FormData) {
 
   const provider = formData.get("provider") as string;
   const key = formData.get("key") as string;
+  const usageLimitStr = formData.get("usageLimit") as string;
+  const allowedUsers = formData.get("allowedUsers") as string;
 
-  if (!provider || !key) return { error: "Missing fields" };
+  if (!provider || !key) return { error: "缺少必填字段" };
 
-  // Here you could add a real fetch to api.openai.com/v1/models to validate the key
-  // For simplicity and speed of development, we do a basic format check
   if (!key.startsWith("sk-")) {
-    return { error: "Invalid API Key format (must start with sk-)" };
+    return { error: "API Key 格式不正确（需以 sk- 开头）" };
   }
 
   const existing = await prisma.tokenKey.findUnique({ where: { key } });
   if (existing) {
-    return { error: "This token is already shared in the platform" };
+    return { error: "该 Token 已在平台中共享" };
   }
+
+  const usageLimit = usageLimitStr ? parseInt(usageLimitStr) : null;
 
   await prisma.tokenKey.create({
     data: {
       key,
       provider,
       userId: session.userId,
-      status: "ACTIVE"
+      status: "ACTIVE",
+      usageLimit: usageLimit && usageLimit > 0 ? usageLimit : null,
+      allowedUsers: allowedUsers?.trim() || null
     }
   });
 
@@ -41,11 +45,9 @@ export async function deleteTokenAction(tokenId: string) {
   const session = await verifySession();
   if (!session) return { error: "Unauthorized" };
 
-  // Ensure owner
   const token = await prisma.tokenKey.findUnique({ where: { id: tokenId } });
   if (!token || token.userId !== session.userId) return { error: "Not allowed" };
 
-  // We hard delete it for simplicity (or we can mark it as frozen)
   await prisma.tokenKey.delete({ where: { id: tokenId } });
   revalidatePath("/dashboard");
   return { success: true };

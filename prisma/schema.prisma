@@ -8,20 +8,24 @@ datasource db {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  email         String    @unique
-  passwordHash  String
-  role          String    @default("USER") // USER, ADMIN
-  platformKey   String    @unique // 分配给消费者的独立的平台消费 Key
-  points        Int       @default(0) // 信用点数
-  inviteCodeId  String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id                String    @id @default(cuid())
+  username          String    @unique  // 用户自定义用户名（推荐但不强制邮箱）
+  displayName       String?            // 用户昵称（可后续更改）
+  passwordHash      String
+  role              String    @default("USER") // USER, ADMIN
+  platformKey       String    @unique // 分配给消费者的独立的平台消费 Key
+  points            Int       @default(0) // 信用点数
+  showOnLeaderboard Boolean   @default(true) // 是否展示在排行榜
+  inviteCodeId      String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
 
-  providedTokens TokenKey[]
-  requestsMade   RequestLog[] @relation("ConsumerLogs")
-  invitesCreated InviteCode[] @relation("Inviter")
-  inviteUsed     InviteCode?  @relation(fields: [inviteCodeId], references: [id])
+  providedTokens  TokenKey[]
+  requestsMade    RequestLog[] @relation("ConsumerLogs")
+  invitesCreated  InviteCode[] @relation("Inviter")
+  inviteUsed      InviteCode?  @relation(fields: [inviteCodeId], references: [id])
+  pointsSent      PointTransfer[] @relation("PointsSent")
+  pointsReceived  PointTransfer[] @relation("PointsReceived")
 }
 
 model InviteCode {
@@ -43,6 +47,8 @@ model TokenKey {
   status          String   @default("ACTIVE") // 活跃 ACTIVE, 耗尽 EXHAUSTED, 封禁 FROZEN
   isAdminSupply   Boolean  @default(false) // 是否为管理员配置的公共补给廉价 Token
   totalUsedTokens Int      @default(0) // 累计提供消耗的官方 tokens
+  usageLimit      Int?     // 使用上限（null 表示无限）
+  allowedUsers    String?  // 允许使用的用户名列表（逗号分隔，空=所有人开放）
   userId          String   // 拥有该 Token 的用户
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
@@ -61,4 +67,15 @@ model RequestLog {
 
   consumer        User     @relation("ConsumerLogs", fields: [consumerId], references: [id])
   token           TokenKey @relation(fields: [tokenId], references: [id])
+}
+
+model PointTransfer {
+  id          String   @id @default(cuid())
+  fromUserId  String
+  toUserId    String
+  amount      Int
+  createdAt   DateTime @default(now())
+
+  fromUser    User     @relation("PointsSent", fields: [fromUserId], references: [id])
+  toUser      User     @relation("PointsReceived", fields: [toUserId], references: [id])
 }

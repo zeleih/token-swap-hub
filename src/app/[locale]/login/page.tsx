@@ -27,13 +27,12 @@ export default function LoginPage() {
           )}
 
           <div>
-            <label className="block text-sm font-medium text-zinc-300 mb-2">{t("email")}</label>
+            <label className="block text-sm font-medium text-zinc-300 mb-2">{t("username")}</label>
             <input
-              name="email"
-              type="email"
+              name="username"
               required
               className="w-full px-4 py-3 bg-black/40 border border-white/10 rounded-xl text-white outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all placeholder-zinc-600"
-              placeholder="you@example.com"
+              placeholder={t("usernamePlaceholder")}
             />
           </div>
 
