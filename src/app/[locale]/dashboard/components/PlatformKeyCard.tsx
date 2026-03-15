@@ -81,7 +81,7 @@ export default function PlatformKeyCard({
       <div className="relative z-10 flex justify-between items-center">
         <div className="mb-2 flex items-center gap-1.5">
           <h3 className="text-sm font-medium text-zinc-500 dark:text-zinc-400">{label}</h3>
-          <HelpHint text={labelHelpText} side="bottom" />
+          <HelpHint text={labelHelpText} />
         </div>
         <button
           type="button"
