@@ -56,21 +56,31 @@ const badgeStyles: Record<UsageLogType, string> = {
 export default function UsageLogPanel({
   logs,
   texts,
+  visibleTypes,
 }: {
   logs: UsageLogItem[];
   texts: UsageLogTexts;
+  visibleTypes?: UsageLogType[];
 }) {
   const [activeFilter, setActiveFilter] = useState<UsageLogFilter>("all");
   const [providerFilter, setProviderFilter] = useState("all");
   const [page, setPage] = useState(1);
 
-  const filterOptions: Array<{ value: UsageLogFilter; label: string }> = [
-    { value: "all", label: texts.all },
-    { value: "usage", label: texts.usage },
-    { value: "provided", label: texts.provided },
-    { value: "directedUsage", label: texts.directedUsage },
-    { value: "directedProvided", label: texts.directedProvided },
-  ];
+  const typesToShow = visibleTypes ?? ["usage", "provided", "directedUsage", "directedProvided"];
+  const filterOptions: Array<{ value: UsageLogFilter; label: string }> = [{ value: "all", label: texts.all }];
+  const typeLabels: Record<UsageLogType, string> = {
+    usage: texts.usage,
+    provided: texts.provided,
+    directedUsage: texts.directedUsage,
+    directedProvided: texts.directedProvided,
+  };
+
+  for (const type of typesToShow) {
+    filterOptions.push({
+      value: type,
+      label: typeLabels[type],
+    });
+  }
 
   const providers = Array.from(new Set(logs.map((log) => log.provider))).sort();
 
@@ -172,7 +182,7 @@ export default function UsageLogPanel({
                     <div>
                       <p className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400 md:hidden">{texts.typeHeader}</p>
                       <span className={`inline-flex whitespace-nowrap rounded-full px-2 py-1 text-[11px] font-medium ${badgeStyles[log.type]}`}>
-                        {filterOptions.find((option) => option.value === log.type)?.label}
+                        {typeLabels[log.type]}
                       </span>
                     </div>
 
