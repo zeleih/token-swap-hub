@@ -26,6 +26,8 @@ export default function AddTokenForm({
   title,
   titleHelp,
   platformLabel,
+  openAiOptionLabel,
+  customOptionLabel,
   apiKeyLabel,
   submitText,
   validatingText,
@@ -52,6 +54,8 @@ export default function AddTokenForm({
   title: string;
   titleHelp: string;
   platformLabel: string;
+  openAiOptionLabel: string;
+  customOptionLabel: string;
   apiKeyLabel: string;
   submitText: string;
   validatingText: string;
@@ -103,6 +107,8 @@ export default function AddTokenForm({
         state={state}
         isPending={isPending}
         platformLabel={platformLabel}
+        openAiOptionLabel={openAiOptionLabel}
+        customOptionLabel={customOptionLabel}
         apiKeyLabel={apiKeyLabel}
         submitText={submitText}
         validatingText={validatingText}
@@ -135,6 +141,8 @@ function FormBody({
   state,
   isPending,
   platformLabel,
+  openAiOptionLabel,
+  customOptionLabel,
   apiKeyLabel,
   submitText,
   validatingText,
@@ -162,6 +170,8 @@ function FormBody({
   state: FormState | undefined;
   isPending: boolean;
   platformLabel: string;
+  openAiOptionLabel: string;
+  customOptionLabel: string;
   apiKeyLabel: string;
   submitText: string;
   validatingText: string;
@@ -248,8 +258,8 @@ function FormBody({
             onChange={(event) => setProvider(event.target.value as "openai" | "custom")}
             className="w-full px-4 py-3 bg-zinc-50 dark:bg-black/40 border border-zinc-200 dark:border-white/10 rounded-xl text-zinc-900 dark:text-white outline-none focus:border-blue-500/50"
           >
-            <option value="openai">OpenAI (GPT)</option>
-            <option value="custom">自定义 / Custom</option>
+            <option value="openai">{openAiOptionLabel}</option>
+            <option value="custom">{customOptionLabel}</option>
           </select>
           </label>
         </div>

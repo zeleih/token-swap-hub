@@ -626,6 +626,8 @@ export default async function DashboardPage({ searchParams }: PageProps) {
               title={t("addToken")}
               titleHelp={t("addTokenHelp")}
               platformLabel={t("platform")}
+              openAiOptionLabel={t("platformOpenAIOption")}
+              customOptionLabel={t("platformCustomOption")}
               apiKeyLabel={t("apiKey")}
               submitText={t("submitToken")}
               validatingText={t("validating")}

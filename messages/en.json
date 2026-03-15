@@ -117,6 +117,8 @@
     "revoke": "Revoke",
     "confirmRevoke": "Are you sure you want to stop sharing this token?",
     "platform": "Platform",
+    "platformOpenAIOption": "OpenAI",
+    "platformCustomOption": "Custom",
     "platformHelp": "Choose whether you are contributing an official OpenAI source or a custom platform compatible with the OpenAI API.",
     "apiKey": "API Key",
     "apiKeyHelp": "Enter the real upstream provider key here. The platform stores it securely and uses it only when proxying requests.",

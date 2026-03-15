@@ -117,6 +117,8 @@
     "revoke": "撤销",
     "confirmRevoke": "确定要停止共享该 Token 吗？",
     "platform": "平台",
+    "platformOpenAIOption": "OpenAI",
+    "platformCustomOption": "自定义",
     "platformHelp": "选择你要贡献的是 OpenAI 官方来源，还是自定义兼容 OpenAI API 的平台。",
     "apiKey": "API Key",
     "apiKeyHelp": "这里填写你真实的上游平台 Key。平台会安全保存并仅在转发请求时使用。",
