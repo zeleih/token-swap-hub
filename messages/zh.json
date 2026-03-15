@@ -93,8 +93,11 @@
     "tools": "工具箱",
     "toolsTitle": "个人工具箱",
     "toolsSubtitle": "额度管理、多平台监控等功能正在开发中。",
+    "pauseToken": "暂停",
+    "resumeToken": "恢复",
+    "unlimitedText": "无限制",
     "announcement": "公告",
-    "announcementTitle": "🎉 欢迎使用 Token 共享平台",
-    "announcementContent": "本平台帮助您在朋友之间共享闲置的 AI Token。\n\n🔑 分享您的 Token → 赚取信用点数\n💎 消耗信用点数 → 使用共享池的 AI 能力\n🎯 定向开放 → 指定好友免费使用，双方不计费、不计排名\n🏆 排行榜 → 查看社区贡献与消费排名（不含定向）\n\n如有问题请联系管理员。祝使用愉快！"
+    "announcementTitle": "⚠️ 平台测试中 — 欢迎体验与反馈",
+    "announcementContent": "🚧 当前平台处于测试阶段，功能可能存在不稳定的情况。\n\n📩 如果您发现了任何 Bug，请发送邮件至 hhuhzl@outlook.com 描述问题。经确认的有效 Bug 将获得 Token 奖励！\n\n---\n\n📌 平台功能简介：\n🔑 分享您的 Token → 赚取信用点数\n💎 消耗信用点数 → 使用共享池的 AI 能力\n🎯 定向开放 → 指定好友免费使用，双方不计费、不计排名\n🏆 排行榜 → 查看社区贡献与消费排名（不含定向）\n🌐 支持：OpenAI / DeepSeek / 智谱 / Moonshot / 通义千问 / Claude / Gemini / Groq / Mistral\n\n感谢您的参与和支持！"
   }
 }

@@ -93,8 +93,11 @@
     "tools": "Tools",
     "toolsTitle": "Personal Toolbox",
     "toolsSubtitle": "Quota management, multi-platform monitoring and more features are under development.",
+    "pauseToken": "Pause",
+    "resumeToken": "Resume",
+    "unlimitedText": "Unlimited",
     "announcement": "Announcements",
-    "announcementTitle": "🎉 Welcome to Token Swap Hub",
-    "announcementContent": "This platform helps you share idle AI tokens among friends.\n\n🔑 Share Tokens → Earn credits\n💎 Spend credits → Use collective AI power\n🎯 Directed sharing → Friends use for free, no credits or rankings impact\n🏆 Leaderboard → See community rankings (excludes directed)\n\nContact the admin if you need help. Enjoy!"
+    "announcementTitle": "⚠️ Platform in Testing — Your Feedback Matters",
+    "announcementContent": "🚧 The platform is currently in testing. Some features may be unstable.\n\n📩 If you find any bugs, email hhuhzl@outlook.com with details. Confirmed valid bugs will be rewarded with tokens!\n\n---\n\n📌 Platform Features:\n🔑 Share Tokens → Earn credits\n💎 Spend credits → Use collective AI power\n🎯 Directed sharing → Friends use for free, no credits or rankings impact\n🏆 Leaderboard → See community rankings (excludes directed)\n🌐 Supported: OpenAI / DeepSeek / Zhipu / Moonshot / Qwen / Claude / Gemini / Groq / Mistral\n\nThank you for your participation and support!"
   }
 }

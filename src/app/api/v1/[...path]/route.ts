@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createParser } from "eventsource-parser";
+import { getProviderBaseUrl } from "@/lib/providers";
 
 export const runtime = "nodejs";
 
@@ -69,10 +70,11 @@ async function handleProxy(req: NextRequest, params: { path: string[] }) {
   // 定向开放的 Token（有白名单）不赚取信用点数
   const isDirected = !!chosenToken.allowedUsers;
 
-  // Reconstruct target URL
+  // Reconstruct target URL based on chosen token's provider
   const targetUrl = new URL(req.url);
   const pathString = params.path.join("/");
-  const proxyTarget = `https://api.openai.com/v1/${pathString}${targetUrl.search}`;
+  const providerBaseUrl = getProviderBaseUrl(chosenToken.provider);
+  const proxyTarget = `${providerBaseUrl}/${pathString}${targetUrl.search}`;
 
   const fetchOptions: RequestInit = {
     method: req.method,

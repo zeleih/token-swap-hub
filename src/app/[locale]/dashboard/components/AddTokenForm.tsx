@@ -86,7 +86,16 @@ export default function AddTokenForm({
           <div>
             <label className="block text-sm font-medium text-zinc-500 dark:text-zinc-400 mb-2">{platformLabel}</label>
             <select name="provider" className="w-full px-4 py-3 bg-zinc-50 dark:bg-black/40 border border-zinc-200 dark:border-white/10 rounded-xl text-zinc-900 dark:text-white outline-none focus:border-blue-500/50">
-              <option value="openai">OpenAI (api.openai.com)</option>
+              <option value="openai">OpenAI (GPT)</option>
+              <option value="deepseek">DeepSeek (深度求索)</option>
+              <option value="zhipu">智谱 GLM</option>
+              <option value="moonshot">Moonshot (月之暗面)</option>
+              <option value="qwen">通义千问 Qwen</option>
+              <option value="claude">Anthropic Claude</option>
+              <option value="gemini">Google Gemini</option>
+              <option value="groq">Groq</option>
+              <option value="mistral">Mistral AI</option>
+              <option value="custom">自定义 / Custom</option>
             </select>
           </div>
 

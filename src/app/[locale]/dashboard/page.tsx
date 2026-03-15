@@ -85,6 +85,10 @@ export default async function DashboardPage() {
               contributedText={t("contributed")}
               revokeText={t("revoke")}
               confirmRevokeText={t("confirmRevoke")}
+              pauseText={t("pauseToken")}
+              resumeText={t("resumeToken")}
+              usageLimitText={t("usageLimit")}
+              unlimitedText={t("unlimitedText")}
             />
           </div>
 

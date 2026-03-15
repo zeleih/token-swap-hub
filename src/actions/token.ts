@@ -15,8 +15,8 @@ export async function addTokenAction(prevState: any, formData: FormData) {
 
   if (!provider || !key) return { error: "缺少必填字段" };
 
-  if (!key.startsWith("sk-")) {
-    return { error: "API Key 格式不正确（需以 sk- 开头）" };
+  if (key.length < 8) {
+    return { error: "API Key 太短" };
   }
 
   const existing = await prisma.tokenKey.findUnique({ where: { key } });
@@ -51,4 +51,22 @@ export async function deleteTokenAction(tokenId: string) {
   await prisma.tokenKey.delete({ where: { id: tokenId } });
   revalidatePath("/dashboard");
   return { success: true };
+}
+
+// 暂停/恢复 Token
+export async function toggleTokenAction(tokenId: string) {
+  const session = await verifySession();
+  if (!session) return { error: "Unauthorized" };
+
+  const token = await prisma.tokenKey.findUnique({ where: { id: tokenId } });
+  if (!token || token.userId !== session.userId) return { error: "Not allowed" };
+
+  const newStatus = token.status === "ACTIVE" ? "PAUSED" : "ACTIVE";
+  await prisma.tokenKey.update({
+    where: { id: tokenId },
+    data: { status: newStatus }
+  });
+
+  revalidatePath("/dashboard");
+  return { success: true, status: newStatus };
 }
