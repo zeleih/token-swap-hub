@@ -25,7 +25,7 @@ export async function updateProfileAction(prevState: any, formData: FormData) {
 }
 
 // 重置平台 Key
-export async function resetPlatformKeyAction() {
+export async function resetPlatformKeyAction(_prevState?: any, _formData?: FormData) {
   const session = await verifySession();
   if (!session) return { error: "Unauthorized" };
 
@@ -37,7 +37,8 @@ export async function resetPlatformKeyAction() {
     data: { platformKey: newKey }
   });
 
-  revalidatePath("/", "layout");
+  revalidatePath("/zh/dashboard");
+  revalidatePath("/en/dashboard");
   return { success: true, newKey };
 }
 

@@ -112,3 +112,13 @@ model ModelPriceSnapshot {
   @@unique([provider, model])
   @@index([provider])
 }
+
+model AppSettings {
+  id                    String   @id @default("global")
+  announcementTitleZh   String?
+  announcementContentZh String?
+  announcementTitleEn   String?
+  announcementContentEn String?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+}

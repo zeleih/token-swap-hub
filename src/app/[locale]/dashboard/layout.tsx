@@ -26,7 +26,7 @@ export default async function DashboardLayout({
 
   const user = await prisma.user.findUnique({
     where: { id: session.userId },
-    select: { username: true, displayName: true, showOnLeaderboard: true }
+    select: { username: true, displayName: true, showOnLeaderboard: true, role: true }
   });
 
   const actionTexts = {
@@ -51,6 +51,10 @@ export default async function DashboardLayout({
     { icon: "📊", label: t("title"), href: "/dashboard" },
     { icon: "🔧", label: t("tools"), href: "/dashboard/tools" },
   ];
+
+  if (user?.role === "ADMIN") {
+    sidebarItems.push({ icon: "🛠️", label: t("admin"), href: "/dashboard/admin" });
+  }
 
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 font-sans">
