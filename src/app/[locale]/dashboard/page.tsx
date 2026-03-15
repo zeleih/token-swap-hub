@@ -162,7 +162,7 @@ export default async function DashboardPage() {
                 confirmRevokeText={t("confirmRevoke")}
                 pauseText={t("pauseToken")}
                 resumeText={t("resumeToken")}
-                usageLimitText={t("usageLimit")}
+                creditLimitText={t("creditLimit")}
                 unlimitedText={t("unlimitedText")}
                 directedBadge={t("directedLabel")}
                 providerFilterLabel={t("providerFilter")}
@@ -172,6 +172,7 @@ export default async function DashboardPage() {
                 prevPageText={t("prevPage")}
                 nextPageText={t("nextPage")}
                 pageLabelText={t("pageLabel")}
+                modelsText={t("modelsText")}
               />
             </div>
           </div>
@@ -255,14 +256,21 @@ export default async function DashboardPage() {
              submitText={t("submitToken")}
              validatingText={t("validating")}
              tokenAddedText={t("tokenAdded")}
-             usageLimitLabel={t("usageLimit")}
-             usageLimitPlaceholder={t("usageLimitPlaceholder")}
+             creditLimitLabel={t("creditLimit")}
+             creditLimitPlaceholder={t("creditLimitPlaceholder")}
              allowedUsersLabel={t("allowedUsers")}
              allowedUsersPlaceholder={t("allowedUsersPlaceholder")}
              allowedUsersTip={t("allowedUsersTip")}
-             oauthTab={t("oauthTab")}
-             manualTab={t("manualTab")}
-             oauthComingSoon={t("oauthComingSoon")}
+             customBaseUrlLabel={t("customBaseUrl")}
+             customBaseUrlPlaceholder={t("customBaseUrlPlaceholder")}
+             customModelsTitle={t("customModels")}
+             customModelsTip={t("customModelsTip")}
+             customModelIdLabel={t("customModelId")}
+             customModelNameLabel={t("customModelName")}
+             customInputPriceLabel={t("customInputPrice")}
+             customOutputPriceLabel={t("customOutputPrice")}
+             addModelText={t("addModel")}
+             removeModelText={t("removeModel")}
            />
         </div>
       </div>

@@ -24,6 +24,17 @@ type PricingResolution = {
   isFallback: boolean;
 };
 
+type PricingOverride = {
+  provider: string;
+  model: string;
+  displayName: string;
+  inputPricePerM: number;
+  outputPricePerM: number;
+  sourceUrl: string;
+  fetchedAt: Date;
+  isFallback?: boolean;
+};
+
 type UsageShape = {
   promptTokens: number;
   completionTokens: number;
@@ -63,189 +74,10 @@ const DEFAULT_MODEL_PRICES: PriceSeed[] = [
     outputPricePerM: 1.6,
     sourceUrl: "https://platform.openai.com/pricing",
   },
-  {
-    provider: "deepseek",
-    model: "deepseek-chat",
-    displayName: "DeepSeek Chat",
-    inputPricePerM: 0.27,
-    outputPricePerM: 1.1,
-    sourceUrl: "https://api-docs.deepseek.com/quick_start/pricing",
-  },
-  {
-    provider: "deepseek",
-    model: "deepseek-reasoner",
-    displayName: "DeepSeek Reasoner",
-    inputPricePerM: 0.55,
-    outputPricePerM: 2.19,
-    sourceUrl: "https://api-docs.deepseek.com/quick_start/pricing",
-  },
-  {
-    provider: "claude",
-    model: "claude-sonnet-4",
-    displayName: "Claude Sonnet 4",
-    inputPricePerM: 3,
-    outputPricePerM: 15,
-    sourceUrl: "https://docs.anthropic.com/en/docs/about-claude/pricing",
-  },
-  {
-    provider: "claude",
-    model: "claude-3-5-haiku",
-    displayName: "Claude 3.5 Haiku",
-    inputPricePerM: 0.8,
-    outputPricePerM: 4,
-    sourceUrl: "https://docs.anthropic.com/en/docs/about-claude/pricing",
-  },
-  {
-    provider: "gemini",
-    model: "gemini-2.5-pro",
-    displayName: "Gemini 2.5 Pro",
-    inputPricePerM: 1.25,
-    outputPricePerM: 10,
-    sourceUrl: "https://ai.google.dev/gemini-api/docs/pricing",
-  },
-  {
-    provider: "gemini",
-    model: "gemini-2.5-flash",
-    displayName: "Gemini 2.5 Flash",
-    inputPricePerM: 0.3,
-    outputPricePerM: 2.5,
-    sourceUrl: "https://ai.google.dev/gemini-api/docs/pricing",
-  },
-  {
-    provider: "gemini",
-    model: "gemini-2.5-flash-lite",
-    displayName: "Gemini 2.5 Flash-Lite",
-    inputPricePerM: 0.1,
-    outputPricePerM: 0.4,
-    sourceUrl: "https://ai.google.dev/gemini-api/docs/pricing",
-  },
-  {
-    provider: "grok",
-    model: "grok-3",
-    displayName: "Grok 3",
-    inputPricePerM: 3,
-    outputPricePerM: 15,
-    sourceUrl: "https://docs.x.ai/docs/models/grok-3",
-  },
-  {
-    provider: "grok",
-    model: "grok-3-mini",
-    displayName: "Grok 3 Mini",
-    inputPricePerM: 0.3,
-    outputPricePerM: 0.5,
-    sourceUrl: "https://docs.x.ai/docs/models/grok-3-mini",
-  },
-  {
-    provider: "moonshot",
-    model: "moonshot-v1-8k",
-    displayName: "Moonshot v1 8K",
-    inputPricePerM: 12,
-    outputPricePerM: 12,
-    sourceUrl: "https://platform.moonshot.cn/docs/pricing/chat",
-    isFallback: true,
-  },
-  {
-    provider: "moonshot",
-    model: "moonshot-v1-32k",
-    displayName: "Moonshot v1 32K",
-    inputPricePerM: 24,
-    outputPricePerM: 24,
-    sourceUrl: "https://platform.moonshot.cn/docs/pricing/chat",
-    isFallback: true,
-  },
-  {
-    provider: "moonshot",
-    model: "moonshot-v1-128k",
-    displayName: "Moonshot v1 128K",
-    inputPricePerM: 60,
-    outputPricePerM: 60,
-    sourceUrl: "https://platform.moonshot.cn/docs/pricing/chat",
-    isFallback: true,
-  },
-  {
-    provider: "qwen",
-    model: "qwen-plus",
-    displayName: "Qwen Plus",
-    inputPricePerM: 0.56,
-    outputPricePerM: 1.68,
-    sourceUrl: "https://help.aliyun.com/zh/model-studio/models",
-    isFallback: true,
-  },
-  {
-    provider: "qwen",
-    model: "qwen-turbo",
-    displayName: "Qwen Turbo",
-    inputPricePerM: 0.07,
-    outputPricePerM: 0.28,
-    sourceUrl: "https://help.aliyun.com/zh/model-studio/models",
-    isFallback: true,
-  },
-  {
-    provider: "qwen",
-    model: "qwen-max",
-    displayName: "Qwen Max",
-    inputPricePerM: 5.6,
-    outputPricePerM: 16.8,
-    sourceUrl: "https://help.aliyun.com/zh/model-studio/models",
-    isFallback: true,
-  },
-  {
-    provider: "zhipu",
-    model: "glm-4-plus",
-    displayName: "GLM-4 Plus",
-    inputPricePerM: 7,
-    outputPricePerM: 7,
-    sourceUrl: "https://docs.bigmodel.cn/cn/guide/models/text/glm-4-plus",
-    isFallback: true,
-  },
-  {
-    provider: "zhipu",
-    model: "glm-4-air",
-    displayName: "GLM-4 Air",
-    inputPricePerM: 0.5,
-    outputPricePerM: 0.5,
-    sourceUrl: "https://docs.bigmodel.cn/cn/guide/models/text/glm-4-air",
-    isFallback: true,
-  },
-  {
-    provider: "mistral",
-    model: "mistral-small-latest",
-    displayName: "Mistral Small",
-    inputPricePerM: 0.2,
-    outputPricePerM: 0.6,
-    sourceUrl: "https://docs.mistral.ai/getting-started/models/models_overview/",
-    isFallback: true,
-  },
-  {
-    provider: "mistral",
-    model: "mistral-medium-latest",
-    displayName: "Mistral Medium",
-    inputPricePerM: 2.75,
-    outputPricePerM: 8.1,
-    sourceUrl: "https://docs.mistral.ai/getting-started/models/models_overview/",
-    isFallback: true,
-  },
-  {
-    provider: "mistral",
-    model: "mistral-large-latest",
-    displayName: "Mistral Large",
-    inputPricePerM: 2,
-    outputPricePerM: 6,
-    sourceUrl: "https://docs.mistral.ai/getting-started/models/models_overview/",
-    isFallback: true,
-  },
 ];
 
 const PROVIDER_SOURCE_URLS: Record<string, string> = {
   openai: "https://platform.openai.com/pricing",
-  deepseek: "https://api-docs.deepseek.com/quick_start/pricing",
-  claude: "https://docs.anthropic.com/en/docs/about-claude/pricing",
-  gemini: "https://ai.google.dev/gemini-api/docs/pricing",
-  grok: "https://docs.x.ai/docs/fundamentals/pricing-overview",
-  moonshot: "https://platform.moonshot.cn/docs/pricing/chat",
-  qwen: "https://help.aliyun.com/zh/model-studio/models",
-  zhipu: "https://docs.bigmodel.cn/cn/guide/models/text/glm-4",
-  mistral: "https://docs.mistral.ai/getting-started/models/models_overview/",
 };
 
 function normalizeModelName(model: string | null | undefined) {
@@ -363,7 +195,7 @@ function maybeExtractPrices(
 }
 
 async function refreshPricingFromOfficialPages(provider?: string) {
-  const providers = provider ? [provider] : ["openai", "deepseek", "claude", "gemini", "grok"];
+  const providers = provider ? [provider] : ["openai"];
   const refreshedSeeds: PriceSeed[] = [];
 
   for (const currentProvider of providers) {
@@ -376,51 +208,6 @@ async function refreshPricingFromOfficialPages(provider?: string) {
           { model: "gpt-4o-mini", displayName: "GPT-4o mini" },
           { model: "gpt-4.1", displayName: "GPT-4.1" },
           { model: "gpt-4.1-mini", displayName: "GPT-4.1 mini" },
-        ])
-      );
-    }
-
-    if (currentProvider === "deepseek") {
-      refreshedSeeds.push(
-        ...maybeExtractPrices(text, currentProvider, [
-          { model: "deepseek-chat", displayName: "DeepSeek Chat" },
-          { model: "deepseek-reasoner", displayName: "DeepSeek Reasoner" },
-        ])
-      );
-    }
-
-    if (currentProvider === "claude") {
-      refreshedSeeds.push(
-        ...maybeExtractPrices(text, currentProvider, [
-          { model: "claude-sonnet-4", displayName: "Claude Sonnet 4" },
-          { model: "claude-3-5-haiku", displayName: "Claude 3.5 Haiku" },
-        ])
-      );
-    }
-
-    if (currentProvider === "gemini") {
-      refreshedSeeds.push(
-        ...maybeExtractPrices(text, currentProvider, [
-          { model: "gemini-2.5-pro", displayName: "Gemini 2.5 Pro" },
-          { model: "gemini-2.5-flash", displayName: "Gemini 2.5 Flash" },
-          { model: "gemini-2.5-flash-lite", displayName: "Gemini 2.5 Flash-Lite" },
-        ])
-      );
-    }
-
-    if (currentProvider === "grok") {
-      refreshedSeeds.push(
-        ...maybeExtractPrices(text, currentProvider, [
-          {
-            model: "grok-3",
-            displayName: "Grok 3",
-            sourceUrl: "https://docs.x.ai/docs/models/grok-3",
-          },
-          {
-            model: "grok-3-mini",
-            displayName: "Grok 3 Mini",
-            sourceUrl: "https://docs.x.ai/docs/models/grok-3-mini",
-          },
         ])
       );
     }
@@ -558,8 +345,9 @@ export async function calculateCreditsForUsage(params: {
   promptTokens: number;
   completionTokens: number;
   totalTokens: number;
+  pricingOverride?: PricingOverride | null;
 }) {
-  const pricing = await resolveModelPricing(params.provider, params.model);
+  const pricing = params.pricingOverride ?? await resolveModelPricing(params.provider, params.model);
 
   if (!pricing) {
     return null;

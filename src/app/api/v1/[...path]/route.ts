@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { createParser } from "eventsource-parser";
 import { getProviderBaseUrl } from "@/lib/providers";
 import { calculateCreditsForUsage, extractUsage } from "@/lib/pricing";
+import { findCustomModelConfig, parseCustomModelsConfig } from "@/lib/custom-models";
 
 export const runtime = "nodejs";
 
@@ -16,7 +17,10 @@ type TokenWithUser = {
   status: string;
   isAdminSupply: boolean;
   totalUsedTokens: number;
-  usageLimit: number | null;
+  usedCredits: number;
+  creditLimit: number | null;
+  customBaseUrl: string | null;
+  customModelsConfig: string | null;
   allowedUsers: string | null;
   userId: string;
   user: {
@@ -92,6 +96,9 @@ async function handleProxy(req: NextRequest, params: RouteParams) {
     return NextResponse.json({ error: "Insufficient points. Earn more by sharing tokens!" }, { status: 402 });
   }
 
+  const pathString = params.path.join("/");
+  const parsedBody = await parseRequestBody(req, pathString);
+
   // Pick a token: only consumer's own tokens + tokens directed to consumer + admin supply tokens
   const allActiveTokens = await prisma.tokenKey.findMany({
     where: { status: "ACTIVE" },
@@ -100,8 +107,16 @@ async function handleProxy(req: NextRequest, params: RouteParams) {
 
   const consumerUsername = consumer.username;
   const availableTokens = (allActiveTokens as TokenWithUser[]).filter((token) => {
-    // Check usage limit
-    if (token.usageLimit !== null && token.totalUsedTokens >= token.usageLimit) return false;
+    if (!["openai", "custom"].includes(token.provider)) return false;
+    // Check credit limit
+    if (token.creditLimit !== null && token.usedCredits >= token.creditLimit) return false;
+    if (token.provider === "custom" && (!token.customBaseUrl || !token.customModelsConfig)) return false;
+    if (
+      token.provider === "custom" &&
+      !findCustomModelConfig(parseCustomModelsConfig(token.customModelsConfig), parsedBody.model)
+    ) {
+      return false;
+    }
 
     // Rule 1: Consumer's own tokens are always available
     if (token.userId === consumer.id) return true;
@@ -130,10 +145,16 @@ async function handleProxy(req: NextRequest, params: RouteParams) {
 
   // Reconstruct target URL based on chosen token's provider
   const targetUrl = new URL(req.url);
-  const pathString = params.path.join("/");
-  const providerBaseUrl = getProviderBaseUrl(chosenToken.provider);
+  const providerBaseUrl = getProviderBaseUrl(chosenToken.provider, chosenToken.customBaseUrl);
   const proxyTarget = `${providerBaseUrl}/${pathString}${targetUrl.search}`;
-  const parsedBody = await parseRequestBody(req, pathString);
+
+  const customModelConfig = chosenToken.provider === "custom"
+    ? findCustomModelConfig(parseCustomModelsConfig(chosenToken.customModelsConfig), parsedBody.model)
+    : null;
+
+  if (chosenToken.provider === "custom" && !customModelConfig) {
+    return NextResponse.json({ error: "Custom model is not configured for this token source." }, { status: 400 });
+  }
 
   const fetchOptions: RequestInit = {
     method: req.method,
@@ -197,6 +218,7 @@ async function handleProxy(req: NextRequest, params: RouteParams) {
           providerOwnerId: chosenToken.userId,
           provider: chosenToken.provider,
           model: parsedBody.model,
+          customModelConfig,
           usage: finalUsage,
           isAdminSupply: chosenToken.isAdminSupply,
           isDirected,
@@ -223,6 +245,7 @@ async function handleProxy(req: NextRequest, params: RouteParams) {
       providerOwnerId: chosenToken.userId,
       provider: chosenToken.provider,
       model: parsedBody.model,
+      customModelConfig,
       usage: finalUsage,
       isAdminSupply: chosenToken.isAdminSupply,
       isDirected,
@@ -241,6 +264,12 @@ async function commitBilling(params: {
   providerOwnerId: string;
   provider: string;
   model: string | null;
+  customModelConfig: {
+    id: string;
+    name: string;
+    inputPricePerM: number;
+    outputPricePerM: number;
+  } | null;
   usage: {
     promptTokens: number;
     completionTokens: number;
@@ -257,6 +286,16 @@ async function commitBilling(params: {
     promptTokens: params.usage.promptTokens,
     completionTokens: params.usage.completionTokens,
     totalTokens: params.usage.totalTokens,
+    pricingOverride: params.customModelConfig ? {
+      provider: params.provider,
+      model: params.customModelConfig.id,
+      displayName: params.customModelConfig.name,
+      inputPricePerM: params.customModelConfig.inputPricePerM,
+      outputPricePerM: params.customModelConfig.outputPricePerM,
+      sourceUrl: "custom-token-source",
+      fetchedAt: new Date(),
+      isFallback: false,
+    } : null,
   });
 
   const credits = creditResult?.credits ?? 0;
@@ -266,14 +305,14 @@ async function commitBilling(params: {
 
   const operations: Prisma.PrismaPromise<unknown>[] = [
     prisma.requestLog.create({
-      data: {
-        consumerId: params.consumerId,
-        tokenId: params.tokenId,
+        data: {
+          consumerId: params.consumerId,
+          tokenId: params.tokenId,
         tokensUsed: params.usage.totalTokens,
         promptTokens: params.usage.promptTokens,
         completionTokens: params.usage.completionTokens,
         provider: params.provider,
-        model: params.model,
+        model: params.customModelConfig?.name || params.model,
         inputPricePerM: creditResult?.pricing.inputPricePerM,
         outputPricePerM: creditResult?.pricing.outputPricePerM,
         estimatedCostUsd,
@@ -294,6 +333,12 @@ async function commitBilling(params: {
       prisma.tokenKey.update({
         where: { id: params.tokenId },
         data: { totalUsedTokens: { increment: params.usage.totalTokens } }
+      })
+    );
+    operations.push(
+      prisma.tokenKey.update({
+        where: { id: params.tokenId },
+        data: { usedCredits: { increment: credits } }
       })
     );
     // 扣消费者点数

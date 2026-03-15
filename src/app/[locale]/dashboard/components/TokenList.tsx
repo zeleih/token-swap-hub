@@ -9,7 +9,10 @@ type TokenItem = {
   provider: string;
   status: string;
   totalUsedTokens: number;
-  usageLimit: number | null;
+  usedCredits: number;
+  creditLimit: number | null;
+  customBaseUrl: string | null;
+  customModelsConfig: string | null;
   allowedUsers: string | null;
 };
 
@@ -22,6 +25,23 @@ function formatMillions(value: number) {
   })} M`;
 }
 
+function formatCredits(value: number) {
+  return `${value.toLocaleString(undefined, {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  })} pts`;
+}
+
+function getCustomModelCount(config: string | null) {
+  if (!config) return 0;
+  try {
+    const parsed = JSON.parse(config);
+    return Array.isArray(parsed) ? parsed.length : 0;
+  } catch {
+    return 0;
+  }
+}
+
 export default function TokenList({
   tokens,
   noTokensText,
@@ -30,7 +50,7 @@ export default function TokenList({
   confirmRevokeText,
   pauseText,
   resumeText,
-  usageLimitText,
+  creditLimitText,
   unlimitedText,
   directedBadge,
   providerFilterLabel,
@@ -40,6 +60,7 @@ export default function TokenList({
   prevPageText,
   nextPageText,
   pageLabelText,
+  modelsText,
 }: {
   tokens: TokenItem[];
   noTokensText: string;
@@ -48,7 +69,7 @@ export default function TokenList({
   confirmRevokeText: string;
   pauseText: string;
   resumeText: string;
-  usageLimitText: string;
+  creditLimitText: string;
   unlimitedText: string;
   directedBadge: string;
   providerFilterLabel: string;
@@ -58,6 +79,7 @@ export default function TokenList({
   prevPageText: string;
   nextPageText: string;
   pageLabelText: string;
+  modelsText: string;
 }) {
   const [isPending, startTransition] = useTransition();
   const [providerFilter, setProviderFilter] = useState("all");
@@ -144,8 +166,10 @@ export default function TokenList({
             {paginatedTokens.map((token) => {
               const isActive = token.status === "ACTIVE";
               const isPaused = token.status === "PAUSED";
-              const limit = token.usageLimit;
-              const used = token.totalUsedTokens;
+              const limit = token.creditLimit;
+              const usedTokens = token.totalUsedTokens;
+              const usedCredits = token.usedCredits;
+              const customModelCount = getCustomModelCount(token.customModelsConfig);
 
               return (
                 <li key={token.id} className={`flex flex-col justify-between rounded-xl border p-4 transition-all ${
@@ -170,6 +194,11 @@ export default function TokenList({
                       <p className="mt-2 w-36 truncate font-mono text-sm text-zinc-800 dark:text-zinc-200">
                         ...{token.key.slice(-6)}
                       </p>
+                      {token.provider === "custom" && (
+                        <p className="mt-1 max-w-[14rem] truncate text-[11px] text-zinc-500 dark:text-zinc-400">
+                          {token.customBaseUrl} · {customModelCount} {modelsText}
+                        </p>
+                      )}
                     </div>
 
                     <span className={`rounded-full px-2 py-1 text-xs ${
@@ -185,22 +214,22 @@ export default function TokenList({
                     <div className="flex justify-between gap-3">
                       <span>{contributedText}</span>
                       <span className="font-medium text-zinc-700 dark:text-zinc-300">
-                        {formatMillions(used || 0)}
+                        {formatMillions(usedTokens || 0)}
                       </span>
                     </div>
                     <div className="flex justify-between gap-3">
-                      <span>{usageLimitText}</span>
+                      <span>{creditLimitText}</span>
                       <span className="font-medium text-zinc-700 dark:text-zinc-300">
                         {limit !== null
-                          ? `${formatMillions(used || 0)} / ${formatMillions(limit)}`
+                          ? `${formatCredits(usedCredits)} / ${formatCredits(limit)}`
                           : unlimitedText}
                       </span>
                     </div>
                     {limit !== null && (
                       <div className="mt-1 h-1.5 w-full rounded-full bg-zinc-200 dark:bg-white/10">
                         <div
-                          className={`h-1.5 rounded-full transition-all ${used >= limit ? "bg-red-500" : "bg-blue-500"}`}
-                          style={{ width: `${Math.min(100, (used / limit) * 100)}%` }}
+                          className={`h-1.5 rounded-full transition-all ${usedCredits >= limit ? "bg-red-500" : "bg-blue-500"}`}
+                          style={{ width: `${Math.min(100, (usedCredits / limit) * 100)}%` }}
                         />
                       </div>
                     )}

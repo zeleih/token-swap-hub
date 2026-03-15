@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { verifySession } from "@/lib/session";
 import { revalidatePath } from "next/cache";
+import { normalizeBaseUrl, parseCustomModelsConfig } from "@/lib/custom-models";
 
 export async function addTokenAction(prevState: any, formData: FormData) {
   const session = await verifySession();
@@ -10,10 +11,13 @@ export async function addTokenAction(prevState: any, formData: FormData) {
 
   const provider = formData.get("provider") as string;
   const key = formData.get("key") as string;
-  const usageLimitStr = formData.get("usageLimit") as string;
+  const creditLimitStr = formData.get("creditLimit") as string;
   const allowedUsers = formData.get("allowedUsers") as string;
+  const customBaseUrl = formData.get("customBaseUrl") as string;
+  const customModelsConfigRaw = formData.get("customModelsConfig") as string;
 
   if (!provider || !key) return { error: "缺少必填字段" };
+  if (!["openai", "custom"].includes(provider)) return { error: "当前仅支持 OpenAI 和自定义平台" };
 
   if (key.length < 8) {
     return { error: "API Key 太短" };
@@ -24,10 +28,27 @@ export async function addTokenAction(prevState: any, formData: FormData) {
     return { error: "该 Token 已在平台中共享" };
   }
 
-  const usageLimitInMillions = usageLimitStr ? parseFloat(usageLimitStr) : null;
-  const usageLimit = usageLimitInMillions && usageLimitInMillions > 0
-    ? Math.round(usageLimitInMillions * 1_000_000)
-    : null;
+  const creditLimit = creditLimitStr ? parseFloat(creditLimitStr) : null;
+  if (creditLimit !== null && (!Number.isFinite(creditLimit) || creditLimit <= 0)) {
+    return { error: "额度必须大于 0" };
+  }
+
+  let normalizedCustomBaseUrl: string | null = null;
+  let customModelsConfig: string | null = null;
+
+  if (provider === "custom") {
+    normalizedCustomBaseUrl = normalizeBaseUrl(customBaseUrl || "");
+    if (!/^https?:\/\//i.test(normalizedCustomBaseUrl)) {
+      return { error: "自定义平台 URL 必须以 http:// 或 https:// 开头" };
+    }
+
+    const customModels = parseCustomModelsConfig(customModelsConfigRaw);
+    if (customModels.length === 0) {
+      return { error: "请至少配置一个自定义模型" };
+    }
+
+    customModelsConfig = JSON.stringify(customModels);
+  }
 
   await prisma.tokenKey.create({
     data: {
@@ -35,7 +56,9 @@ export async function addTokenAction(prevState: any, formData: FormData) {
       provider,
       userId: session.userId,
       status: "ACTIVE",
-      usageLimit,
+      creditLimit,
+      customBaseUrl: normalizedCustomBaseUrl,
+      customModelsConfig,
       allowedUsers: allowedUsers?.trim() || null
     }
   });
