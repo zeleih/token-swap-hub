@@ -28,7 +28,7 @@ export default function Sidebar({ items, collapsed: initialCollapsed }: { items:
         {/* Menu Items */}
         <nav className="flex-1 space-y-1 px-2">
           {items.map((item) => {
-            const isActive = pathname.includes(item.href);
+            const isActive = pathname.endsWith(item.href);
             return (
               <Link
                 key={item.href}

@@ -1,8 +1,9 @@
 "use client";
 
-import { useActionState, useEffect, useRef, useState } from "react";
+import { useActionState, useState } from "react";
 import { addTokenAction } from "@/actions/token";
 import { serializeCustomModelsConfig } from "@/lib/custom-models";
+import type { FormState } from "@/lib/form-state";
 
 type CustomModelDraft = {
   id: string;
@@ -66,17 +67,93 @@ export default function AddTokenForm({
   removeModelText: string;
 }) {
   const [state, action, isPending] = useActionState(addTokenAction, undefined);
-  const formRef = useRef<HTMLFormElement>(null);
+  const formResetKey = state?.resetToken || "initial";
+
+  return (
+    <div className="bg-white dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-2xl p-6 shadow-sm">
+      <h3 className="text-xl font-semibold text-zinc-900 dark:text-white mb-4">{title}</h3>
+
+      <FormBody
+        key={formResetKey}
+        action={action}
+        state={state}
+        isPending={isPending}
+        platformLabel={platformLabel}
+        apiKeyLabel={apiKeyLabel}
+        submitText={submitText}
+        validatingText={validatingText}
+        tokenAddedText={tokenAddedText}
+        creditLimitLabel={creditLimitLabel}
+        creditLimitPlaceholder={creditLimitPlaceholder}
+        allowedUsersLabel={allowedUsersLabel}
+        allowedUsersPlaceholder={allowedUsersPlaceholder}
+        allowedUsersTip={allowedUsersTip}
+        customBaseUrlLabel={customBaseUrlLabel}
+        customBaseUrlPlaceholder={customBaseUrlPlaceholder}
+        customModelsTitle={customModelsTitle}
+        customModelsTip={customModelsTip}
+        customModelIdLabel={customModelIdLabel}
+        customModelNameLabel={customModelNameLabel}
+        customInputPriceLabel={customInputPriceLabel}
+        customOutputPriceLabel={customOutputPriceLabel}
+        addModelText={addModelText}
+        removeModelText={removeModelText}
+      />
+    </div>
+  );
+}
+
+function FormBody({
+  action,
+  state,
+  isPending,
+  platformLabel,
+  apiKeyLabel,
+  submitText,
+  validatingText,
+  tokenAddedText,
+  creditLimitLabel,
+  creditLimitPlaceholder,
+  allowedUsersLabel,
+  allowedUsersPlaceholder,
+  allowedUsersTip,
+  customBaseUrlLabel,
+  customBaseUrlPlaceholder,
+  customModelsTitle,
+  customModelsTip,
+  customModelIdLabel,
+  customModelNameLabel,
+  customInputPriceLabel,
+  customOutputPriceLabel,
+  addModelText,
+  removeModelText,
+}: {
+  action: (formData: FormData) => void;
+  state: FormState | undefined;
+  isPending: boolean;
+  platformLabel: string;
+  apiKeyLabel: string;
+  submitText: string;
+  validatingText: string;
+  tokenAddedText: string;
+  creditLimitLabel: string;
+  creditLimitPlaceholder: string;
+  allowedUsersLabel: string;
+  allowedUsersPlaceholder: string;
+  allowedUsersTip: string;
+  customBaseUrlLabel: string;
+  customBaseUrlPlaceholder: string;
+  customModelsTitle: string;
+  customModelsTip: string;
+  customModelIdLabel: string;
+  customModelNameLabel: string;
+  customInputPriceLabel: string;
+  customOutputPriceLabel: string;
+  addModelText: string;
+  removeModelText: string;
+}) {
   const [provider, setProvider] = useState<"openai" | "custom">("openai");
   const [customModels, setCustomModels] = useState<CustomModelDraft[]>([createEmptyModel()]);
-
-  useEffect(() => {
-    if (state?.success) {
-      formRef.current?.reset();
-      setProvider("openai");
-      setCustomModels([createEmptyModel()]);
-    }
-  }, [state]);
 
   const serializedCustomModels = serializeCustomModelsConfig(
     customModels
@@ -97,10 +174,7 @@ export default function AddTokenForm({
   );
 
   return (
-    <div className="bg-white dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-2xl p-6 shadow-sm">
-      <h3 className="text-xl font-semibold text-zinc-900 dark:text-white mb-4">{title}</h3>
-
-      <form action={action} ref={formRef} className="space-y-4">
+      <form action={action} className="space-y-4">
         {state?.error && (
           <div className="p-3 text-sm text-red-200 bg-red-900/30 border border-red-500/20 rounded-xl">
             {state.error}
@@ -298,6 +372,5 @@ export default function AddTokenForm({
           {isPending ? validatingText : submitText}
         </button>
       </form>
-    </div>
   );
 }

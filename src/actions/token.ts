@@ -4,8 +4,10 @@ import { prisma } from "@/lib/prisma";
 import { verifySession } from "@/lib/session";
 import { revalidatePath } from "next/cache";
 import { normalizeBaseUrl, parseCustomModelsConfig } from "@/lib/custom-models";
+import type { FormState } from "@/lib/form-state";
 
-export async function addTokenAction(prevState: any, formData: FormData) {
+export async function addTokenAction(prevState: FormState | undefined, formData: FormData) {
+  void prevState;
   const session = await verifySession();
   if (!session) return { error: "Unauthorized" };
 
@@ -64,7 +66,7 @@ export async function addTokenAction(prevState: any, formData: FormData) {
   });
 
   revalidatePath("/", "layout");
-  return { success: true };
+  return { success: true, resetToken: crypto.randomUUID() };
 }
 
 export async function deleteTokenAction(tokenId: string) {

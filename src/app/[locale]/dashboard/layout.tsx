@@ -49,6 +49,7 @@ export default async function DashboardLayout({
 
   const sidebarItems = [
     { icon: "📊", label: t("title"), href: "/dashboard" },
+    { icon: "📢", label: t("announcement"), href: "/dashboard/announcements" },
     { icon: "🔧", label: t("tools"), href: "/dashboard/tools" },
   ];
 

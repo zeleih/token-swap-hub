@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { getLeaderboardData } from "@/actions/user";
 
 type BoardEntry = { username: string; displayName: string | null; total: number };
@@ -24,12 +24,25 @@ export default function LeaderboardModal({
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setLoading(true);
-    getLeaderboardData(range).then(d => {
+    let cancelled = false;
+
+    getLeaderboardData(range).then((d) => {
+      if (cancelled) {
+        return;
+      }
       setData(d);
       setLoading(false);
     });
+
+    return () => {
+      cancelled = true;
+    };
   }, [range]);
+
+  const handleRangeChange = (nextRange: RangeType) => {
+    setLoading(true);
+    setRange(nextRange);
+  };
 
   const ranges: { key: RangeType; label: string }[] = [
     { key: "day", label: texts.day },
@@ -70,7 +83,7 @@ export default function LeaderboardModal({
           {ranges.map(r => (
             <button
               key={r.key}
-              onClick={() => setRange(r.key)}
+              onClick={() => handleRangeChange(r.key)}
               className={`flex-1 py-1.5 text-xs font-medium rounded-md transition-all ${range === r.key ? "bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-sm" : "text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300"}`}
             >
               {r.label}

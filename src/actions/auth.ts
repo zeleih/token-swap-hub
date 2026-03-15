@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { createSession, deleteSession } from "@/lib/session";
+import type { FormState } from "@/lib/form-state";
 import { compare, hash } from "bcryptjs";
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
@@ -11,7 +12,8 @@ async function getLocale() {
   return c.get("NEXT_LOCALE")?.value || "zh";
 }
 
-export async function loginAction(prevState: any, formData: FormData) {
+export async function loginAction(prevState: FormState | undefined, formData: FormData) {
+  void prevState;
   const username = formData.get("username") as string;
   const password = formData.get("password") as string;
 
@@ -28,7 +30,8 @@ export async function loginAction(prevState: any, formData: FormData) {
   redirect(`/${locale}/dashboard`);
 }
 
-export async function registerAction(prevState: any, formData: FormData) {
+export async function registerAction(prevState: FormState | undefined, formData: FormData) {
+  void prevState;
   const username = formData.get("username") as string;
   const password = formData.get("password") as string;
   const inviteCode = formData.get("inviteCode") as string;
@@ -56,7 +59,7 @@ export async function registerAction(prevState: any, formData: FormData) {
   const platformKey = "tk_" + Array.from(crypto.getRandomValues(new Uint8Array(24)))
     .map(b => b.toString(16).padStart(2, '0')).join('');
 
-  const newUser = await prisma.$transaction(async (tx: any) => {
+  const newUser = await prisma.$transaction(async (tx) => {
     await tx.inviteCode.update({
       where: { id: codeRecord.id },
       data: { usedCount: { increment: 1 } }

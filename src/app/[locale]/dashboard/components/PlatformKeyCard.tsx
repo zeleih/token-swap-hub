@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useState } from "react";
 import { Check, Copy, RefreshCw } from "lucide-react";
 import { resetPlatformKeyAction } from "@/actions/user";
 
@@ -20,17 +20,11 @@ export default function PlatformKeyCard({
   label: string;
 }) {
   const [copied, setCopied] = useState(false);
-  const [currentKey, setCurrentKey] = useState(platformKey);
   const [state, action, isPending] = useActionState(resetPlatformKeyAction, undefined);
-
-  useEffect(() => {
-    if (state?.success && state.newKey) {
-      setCurrentKey(state.newKey);
-    }
-  }, [state]);
+  const displayedKey = state?.newKey || platformKey;
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(currentKey);
+    navigator.clipboard.writeText(displayedKey);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -64,7 +58,7 @@ export default function PlatformKeyCard({
       )}
       <div className="flex items-center gap-2 mt-4 bg-black/5 dark:bg-black/40 p-1.5 rounded-xl border border-zinc-200 dark:border-white/10">
         <code className="text-sm font-mono flex-1 px-3 text-zinc-800 dark:text-zinc-200 truncate">
-          {currentKey}
+          {displayedKey}
         </code>
         <button
           type="button"

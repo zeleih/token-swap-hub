@@ -6,6 +6,38 @@ import UserProfileModal from "./UserProfileModal";
 import LeaderboardModal from "./LeaderboardModal";
 import TransferPointsModal from "./TransferPointsModal";
 
+type DashboardActionTexts = {
+  profile: string;
+  displayName: string;
+  displayNamePlaceholder: string;
+  showOnLeaderboard: string;
+  saveProfile: string;
+  saving: string;
+  profileSaved: string;
+  close: string;
+  leaderboard: string;
+  contributionBoard: string;
+  consumptionBoard: string;
+  rank: string;
+  user: string;
+  tokens_count: string;
+  noData: string;
+  day: string;
+  week: string;
+  month: string;
+  year: string;
+  all: string;
+  transferPoints: string;
+  toUsername: string;
+  toUsernamePlaceholder: string;
+  transferAmount: string;
+  transferAmountPlaceholder: string;
+  confirmTransfer: string;
+  confirmPlaceholder: string;
+  doTransfer: string;
+  transferring: string;
+};
+
 function ModalPortal({ children }: { children: React.ReactNode }) {
   if (typeof document === "undefined") return null;
   return createPortal(children, document.body);
@@ -16,7 +48,7 @@ export default function DashboardActions({
   texts,
 }: {
   user: { displayName: string | null; showOnLeaderboard: boolean };
-  texts: any;
+  texts: DashboardActionTexts;
 }) {
   const [showProfile, setShowProfile] = useState(false);
   const [showLeaderboard, setShowLeaderboard] = useState(false);

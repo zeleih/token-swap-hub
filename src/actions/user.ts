@@ -3,9 +3,11 @@
 import { prisma } from "@/lib/prisma";
 import { verifySession } from "@/lib/session";
 import { revalidatePath } from "next/cache";
+import type { FormState } from "@/lib/form-state";
 
 // 更新个人信息
-export async function updateProfileAction(prevState: any, formData: FormData) {
+export async function updateProfileAction(prevState: FormState | undefined, formData: FormData) {
+  void prevState;
   const session = await verifySession();
   if (!session) return { error: "Unauthorized" };
 
@@ -25,7 +27,12 @@ export async function updateProfileAction(prevState: any, formData: FormData) {
 }
 
 // 重置平台 Key
-export async function resetPlatformKeyAction(_prevState?: any, _formData?: FormData) {
+export async function resetPlatformKeyAction(
+  prevState?: FormState,
+  formData?: FormData,
+) {
+  void prevState;
+  void formData;
   const session = await verifySession();
   if (!session) return { error: "Unauthorized" };
 
@@ -43,7 +50,8 @@ export async function resetPlatformKeyAction(_prevState?: any, _formData?: FormD
 }
 
 // 赠送积分
-export async function transferPointsAction(prevState: any, formData: FormData) {
+export async function transferPointsAction(prevState: FormState | undefined, formData: FormData) {
+  void prevState;
   const session = await verifySession();
   if (!session) return { error: "Unauthorized" };
 

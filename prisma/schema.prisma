@@ -122,3 +122,17 @@ model AppSettings {
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
 }
+
+model Announcement {
+  id          String    @id @default(cuid())
+  titleZh     String
+  contentZh   String
+  titleEn     String
+  contentEn   String
+  isPublished Boolean   @default(true)
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([isPublished, publishedAt])
+}

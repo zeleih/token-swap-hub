@@ -15,8 +15,6 @@ import {
 import { refreshPricingAction } from "@/actions/pricing";
 import { Link } from "@/i18n/routing";
 import { redirect } from "next/navigation";
-import { getAnnouncement } from "@/lib/announcement";
-import AnnouncementPanel from "./components/AnnouncementPanel";
 
 type UsageLogType = "usage" | "provided" | "directedUsage" | "directedProvided";
 
@@ -161,11 +159,6 @@ export default async function DashboardPage({ searchParams }: PageProps) {
     statusHeader: t("statusHeader"),
   };
 
-  const announcement = await getAnnouncement(locale, {
-    title: t("announcementTitle"),
-    content: t("announcementContent"),
-  });
-
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 space-y-8 duration-500">
       <div className="flex flex-wrap gap-2 rounded-2xl border border-zinc-200 bg-white p-2 shadow-sm dark:border-white/10 dark:bg-white/5">
@@ -190,14 +183,6 @@ export default async function DashboardPage({ searchParams }: PageProps) {
           {t("contributionTab")}
         </Link>
       </div>
-
-      <AnnouncementPanel
-        title={announcement.title}
-        content={announcement.content}
-        label={t("announcement")}
-        editLabel={t("editAnnouncement")}
-        showEditLink={user.role === "ADMIN"}
-      />
 
       {activeTab === "usage" ? (
         <>
