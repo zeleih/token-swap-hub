@@ -51,12 +51,14 @@ export default function AddTokenForm({
       {/* Tab switch */}
       <div className="flex gap-2 mb-4">
         <button
+          type="button"
           onClick={() => setTab("manual")}
           className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${tab === "manual" ? "bg-blue-500/10 text-blue-500 border border-blue-500/20" : "text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 border border-transparent"}`}
         >
           {manualTab}
         </button>
         <button
+          type="button"
           onClick={() => setTab("oauth")}
           className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${tab === "oauth" ? "bg-purple-500/10 text-purple-500 border border-purple-500/20" : "text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 border border-transparent"}`}
         >
@@ -112,13 +114,19 @@ export default function AddTokenForm({
 
           <div>
             <label className="block text-sm font-medium text-zinc-500 dark:text-zinc-400 mb-2">{usageLimitLabel}</label>
-            <input
-              name="usageLimit"
-              type="number"
-              min="1"
-              className="w-full px-4 py-3 bg-zinc-50 dark:bg-black/40 border border-zinc-200 dark:border-white/10 rounded-xl text-zinc-900 dark:text-white outline-none focus:border-blue-500/50 placeholder-zinc-400 dark:placeholder-zinc-600"
-              placeholder={usageLimitPlaceholder}
-            />
+            <div className="relative">
+              <input
+                name="usageLimit"
+                type="number"
+                min="0.1"
+                step="0.1"
+                className="w-full px-4 py-3 pr-12 bg-zinc-50 dark:bg-black/40 border border-zinc-200 dark:border-white/10 rounded-xl text-zinc-900 dark:text-white outline-none focus:border-blue-500/50 placeholder-zinc-400 dark:placeholder-zinc-600"
+                placeholder={usageLimitPlaceholder}
+              />
+              <span className="pointer-events-none absolute inset-y-0 right-4 flex items-center text-sm font-medium text-zinc-400 dark:text-zinc-500">
+                M
+              </span>
+            </div>
           </div>
 
           <div>

@@ -15,6 +15,13 @@ type TokenItem = {
 
 const PAGE_SIZE = 6;
 
+function formatMillions(value: number) {
+  return `${(value / 1_000_000).toLocaleString(undefined, {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  })} M`;
+}
+
 export default function TokenList({
   tokens,
   noTokensText,
@@ -26,7 +33,6 @@ export default function TokenList({
   usageLimitText,
   unlimitedText,
   directedBadge,
-  tokensUnit,
   providerFilterLabel,
   statusFilterLabel,
   allProvidersText,
@@ -45,7 +51,6 @@ export default function TokenList({
   usageLimitText: string;
   unlimitedText: string;
   directedBadge: string;
-  tokensUnit: string;
   providerFilterLabel: string;
   statusFilterLabel: string;
   allProvidersText: string;
@@ -180,14 +185,14 @@ export default function TokenList({
                     <div className="flex justify-between gap-3">
                       <span>{contributedText}</span>
                       <span className="font-medium text-zinc-700 dark:text-zinc-300">
-                        {used.toLocaleString()} {tokensUnit}
+                        {formatMillions(used || 0)}
                       </span>
                     </div>
                     <div className="flex justify-between gap-3">
                       <span>{usageLimitText}</span>
                       <span className="font-medium text-zinc-700 dark:text-zinc-300">
                         {limit !== null
-                          ? `${used.toLocaleString()} / ${limit.toLocaleString()} ${tokensUnit}`
+                          ? `${formatMillions(used || 0)} / ${formatMillions(limit)}`
                           : unlimitedText}
                       </span>
                     </div>

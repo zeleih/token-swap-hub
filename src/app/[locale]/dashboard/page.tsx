@@ -165,7 +165,6 @@ export default async function DashboardPage() {
                 usageLimitText={t("usageLimit")}
                 unlimitedText={t("unlimitedText")}
                 directedBadge={t("directedLabel")}
-                tokensUnit={t("tokensUnit")}
                 providerFilterLabel={t("providerFilter")}
                 statusFilterLabel={t("statusFilter")}
                 allProvidersText={t("allProviders")}

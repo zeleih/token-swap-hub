@@ -147,8 +147,8 @@ export default function UsageLogPanel({
         </p>
       ) : (
         <>
-          <div className="overflow-hidden rounded-2xl border border-zinc-200 dark:border-white/10">
-            <div className="hidden grid-cols-[110px_110px_100px_1.3fr_1.1fr_1.3fr_100px_110px_90px] gap-3 border-b border-zinc-200 bg-zinc-50 px-4 py-3 text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:border-white/10 dark:bg-white/5 dark:text-zinc-400 md:grid">
+          <div className="overflow-x-auto rounded-2xl border border-zinc-200 dark:border-white/10">
+            <div className="hidden min-w-[980px] grid-cols-[88px_96px_84px_minmax(0,1.2fr)_148px_168px_92px_96px_78px] gap-2 border-b border-zinc-200 bg-zinc-50 px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-zinc-500 dark:border-white/10 dark:bg-white/5 dark:text-zinc-400 md:grid">
               <span>{texts.timeHeader}</span>
               <span>{texts.typeHeader}</span>
               <span>{texts.providerHeader}</span>
@@ -162,52 +162,52 @@ export default function UsageLogPanel({
 
             <ul className="divide-y divide-zinc-200 dark:divide-white/10">
               {paginatedLogs.map((log) => (
-                <li key={log.id} className="px-4 py-3">
-                  <div className="grid gap-3 md:grid-cols-[110px_110px_100px_1.3fr_1.1fr_1.3fr_100px_110px_90px] md:items-center">
+                <li key={log.id} className="px-3 py-2.5">
+                  <div className="grid gap-2 md:min-w-[980px] md:grid-cols-[88px_96px_84px_minmax(0,1.2fr)_148px_168px_92px_96px_78px] md:items-center">
                     <div>
-                      <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400 md:hidden">{texts.timeHeader}</p>
-                      <p className="text-sm text-zinc-700 dark:text-zinc-200">{log.createdAtLabel}</p>
+                      <p className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400 md:hidden">{texts.timeHeader}</p>
+                      <p className="text-xs text-zinc-700 dark:text-zinc-200">{log.createdAtLabel}</p>
                     </div>
 
                     <div>
-                      <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400 md:hidden">{texts.typeHeader}</p>
-                      <span className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${badgeStyles[log.type]}`}>
+                      <p className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400 md:hidden">{texts.typeHeader}</p>
+                      <span className={`inline-flex whitespace-nowrap rounded-full px-2 py-1 text-[11px] font-medium ${badgeStyles[log.type]}`}>
                         {filterOptions.find((option) => option.value === log.type)?.label}
                       </span>
                     </div>
 
                     <div>
-                      <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400 md:hidden">{texts.providerHeader}</p>
-                      <span className="inline-flex rounded bg-blue-500/10 px-2 py-1 text-xs font-semibold uppercase tracking-wide text-blue-600 dark:text-blue-400">
+                      <p className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400 md:hidden">{texts.providerHeader}</p>
+                      <span className="inline-flex whitespace-nowrap rounded bg-blue-500/10 px-2 py-1 text-[11px] font-semibold uppercase tracking-wide text-blue-600 dark:text-blue-400">
                         {log.provider}
                       </span>
                     </div>
 
                     <div>
-                      <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400 md:hidden">{texts.modelHeader}</p>
-                      <p className="truncate text-sm text-zinc-700 dark:text-zinc-200">{log.model}</p>
+                      <p className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400 md:hidden">{texts.modelHeader}</p>
+                      <p className="truncate text-xs text-zinc-700 dark:text-zinc-200">{log.model}</p>
                     </div>
 
                     <div>
-                      <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400 md:hidden">{texts.tokensHeader}</p>
-                      <p className="text-sm text-zinc-700 dark:text-zinc-200">
+                      <p className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400 md:hidden">{texts.tokensHeader}</p>
+                      <p className="whitespace-nowrap text-xs text-zinc-700 dark:text-zinc-200">
                         I {log.inputTokens} / O {log.outputTokens} / T {log.totalTokens}
                       </p>
                     </div>
 
                     <div>
-                      <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400 md:hidden">{texts.priceHeader}</p>
-                      <p className="text-sm text-zinc-700 dark:text-zinc-200">{log.unitPrice}</p>
+                      <p className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400 md:hidden">{texts.priceHeader}</p>
+                      <p className="truncate whitespace-nowrap text-xs text-zinc-700 dark:text-zinc-200">{log.unitPrice}</p>
                     </div>
 
                     <div>
-                      <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400 md:hidden">{texts.costHeader}</p>
-                      <p className="text-sm text-zinc-700 dark:text-zinc-200">{log.costUsd}</p>
+                      <p className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400 md:hidden">{texts.costHeader}</p>
+                      <p className="whitespace-nowrap text-xs text-zinc-700 dark:text-zinc-200">{log.costUsd}</p>
                     </div>
 
                     <div>
-                      <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400 md:hidden">{texts.pointsHeader}</p>
-                      <p className={`text-sm font-medium ${
+                      <p className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400 md:hidden">{texts.pointsHeader}</p>
+                      <p className={`whitespace-nowrap text-xs font-medium ${
                         log.creditDelta.startsWith("-")
                           ? "text-red-500"
                           : log.creditDelta.startsWith("+")
@@ -219,8 +219,8 @@ export default function UsageLogPanel({
                     </div>
 
                     <div>
-                      <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400 md:hidden">{texts.statusHeader}</p>
-                      <span className={`inline-flex rounded px-2 py-1 text-xs font-medium ${
+                      <p className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400 md:hidden">{texts.statusHeader}</p>
+                      <span className={`inline-flex whitespace-nowrap rounded px-2 py-1 text-[11px] font-medium ${
                         log.status === "SUCCESS"
                           ? "bg-emerald-500/10 text-emerald-500"
                           : "bg-red-500/10 text-red-500"

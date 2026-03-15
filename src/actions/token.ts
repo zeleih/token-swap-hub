@@ -24,7 +24,10 @@ export async function addTokenAction(prevState: any, formData: FormData) {
     return { error: "该 Token 已在平台中共享" };
   }
 
-  const usageLimit = usageLimitStr ? parseInt(usageLimitStr) : null;
+  const usageLimitInMillions = usageLimitStr ? parseFloat(usageLimitStr) : null;
+  const usageLimit = usageLimitInMillions && usageLimitInMillions > 0
+    ? Math.round(usageLimitInMillions * 1_000_000)
+    : null;
 
   await prisma.tokenKey.create({
     data: {
@@ -32,12 +35,12 @@ export async function addTokenAction(prevState: any, formData: FormData) {
       provider,
       userId: session.userId,
       status: "ACTIVE",
-      usageLimit: usageLimit && usageLimit > 0 ? usageLimit : null,
+      usageLimit,
       allowedUsers: allowedUsers?.trim() || null
     }
   });
 
-  revalidatePath("/dashboard");
+  revalidatePath("/", "layout");
   return { success: true };
 }
 
@@ -48,8 +51,12 @@ export async function deleteTokenAction(tokenId: string) {
   const token = await prisma.tokenKey.findUnique({ where: { id: tokenId } });
   if (!token || token.userId !== session.userId) return { error: "Not allowed" };
 
-  await prisma.tokenKey.delete({ where: { id: tokenId } });
-  revalidatePath("/dashboard");
+  await prisma.$transaction([
+    prisma.requestLog.deleteMany({ where: { tokenId } }),
+    prisma.tokenKey.delete({ where: { id: tokenId } }),
+  ]);
+
+  revalidatePath("/", "layout");
   return { success: true };
 }
 
@@ -67,6 +74,6 @@ export async function toggleTokenAction(tokenId: string) {
     data: { status: newStatus }
   });
 
-  revalidatePath("/dashboard");
+  revalidatePath("/", "layout");
   return { success: true, status: newStatus };
 }
