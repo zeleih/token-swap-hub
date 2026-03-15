@@ -362,7 +362,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
                 <h3 className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
                   {t("points")}
                 </h3>
-                <HelpHint text={t("pointsHelp")} />
+                <HelpHint text={t("pointsHelp")} side="bottom" />
               </div>
               <div className="flex items-baseline gap-2">
                 <span className="text-4xl font-bold tracking-tight text-zinc-900 dark:text-white">
@@ -390,7 +390,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
                 <h3 className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
                   {t("platformUrl")}
                 </h3>
-                <HelpHint text={t("platformUrlHelp")} />
+                <HelpHint text={t("platformUrlHelp")} side="bottom" />
               </div>
               <DashboardCopyKey platformKey={platformUrl} copyText={t("copy")} />
               <p className="mt-2 text-xs text-zinc-400">{t("platformKeyTip")}</p>
@@ -537,7 +537,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
                 <h3 className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
                   {t("points")}
                 </h3>
-                <HelpHint text={t("pointsHelp")} />
+                <HelpHint text={t("pointsHelp")} side="bottom" />
               </div>
               <div className="flex items-baseline gap-2">
                 <span className="text-4xl font-bold tracking-tight text-zinc-900 dark:text-white">
