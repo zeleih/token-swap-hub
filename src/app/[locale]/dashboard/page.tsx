@@ -16,6 +16,7 @@ import { refreshPricingAction } from "@/actions/pricing";
 import { Link } from "@/i18n/routing";
 import { redirect } from "next/navigation";
 import { parseCustomModelsConfig } from "@/lib/custom-models";
+import HelpHint from "./components/HelpHint";
 
 type UsageLogType = "usage" | "provided" | "directedUsage" | "directedProvided";
 
@@ -313,6 +314,18 @@ export default async function DashboardPage({ searchParams }: PageProps) {
     costHeader: t("costHeader"),
     pointsHeader: t("pointsChangeHeader"),
     statusHeader: t("statusHeader"),
+    helpTexts: {
+      providerFilter: t("providerFilterHelp"),
+      time: t("timeHeaderHelp"),
+      type: t("typeHeaderHelp"),
+      provider: t("providerHeaderHelp"),
+      model: t("modelHeaderHelp"),
+      tokens: t("tokensHeaderHelp"),
+      price: t("priceHeaderHelp"),
+      cost: t("costHeaderHelp"),
+      points: t("pointsChangeHeaderHelp"),
+      status: t("statusHeaderHelp"),
+    },
   };
 
   return (
@@ -345,9 +358,12 @@ export default async function DashboardPage({ searchParams }: PageProps) {
           <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
             <div className="relative overflow-hidden rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-white/5">
               <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-blue-500/10 blur-2xl" />
-              <h3 className="mb-2 text-sm font-medium text-zinc-500 dark:text-zinc-400">
-                {t("points")}
-              </h3>
+              <div className="mb-2 flex items-center gap-1.5">
+                <h3 className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
+                  {t("points")}
+                </h3>
+                <HelpHint text={t("pointsHelp")} />
+              </div>
               <div className="flex items-baseline gap-2">
                 <span className="text-4xl font-bold tracking-tight text-zinc-900 dark:text-white">
                   {formatPoints(user.points)}
@@ -365,13 +381,17 @@ export default async function DashboardPage({ searchParams }: PageProps) {
               resetDoneText={t("resetKeyDone")}
               confirmResetText={t("confirmResetKey")}
               label={t("platformKey")}
+              labelHelpText={t("platformKeyHelp")}
             />
 
             <div className="relative flex flex-col justify-between overflow-hidden rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-white/5">
               <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-emerald-500/10 blur-2xl" />
-              <h3 className="mb-2 text-sm font-medium text-zinc-500 dark:text-zinc-400">
-                {t("platformUrl")}
-              </h3>
+              <div className="mb-2 flex items-center gap-1.5">
+                <h3 className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
+                  {t("platformUrl")}
+                </h3>
+                <HelpHint text={t("platformUrlHelp")} />
+              </div>
               <DashboardCopyKey platformKey={platformUrl} copyText={t("copy")} />
               <p className="mt-2 text-xs text-zinc-400">{t("platformKeyTip")}</p>
             </div>
@@ -380,9 +400,12 @@ export default async function DashboardPage({ searchParams }: PageProps) {
             <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-white/5">
               <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
                 <div>
-                  <h3 className="text-xl font-semibold text-zinc-900 dark:text-white">
-                    {t("availableModelsTitle")}
-                  </h3>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-xl font-semibold text-zinc-900 dark:text-white">
+                      {t("availableModelsTitle")}
+                    </h3>
+                    <HelpHint text={t("availableModelsTitleHelp")} />
+                  </div>
                   <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
                     {t("availableModelsSubtitle")}
                   </p>
@@ -469,22 +492,25 @@ export default async function DashboardPage({ searchParams }: PageProps) {
             <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-white/5">
               <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
                 <div>
-                  <h3 className="text-xl font-semibold text-zinc-900 dark:text-white">
-                  {t("usageRecordsTitle")}
-                </h3>
-                <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
-                  {t("pricingUpdatedAt", {
-                    time: latestPricingRefreshAt
-                      ? new Intl.DateTimeFormat(locale, {
-                          month: "2-digit",
-                          day: "2-digit",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        }).format(latestPricingRefreshAt)
-                      : t("pricingUnknown"),
-                  })}
-                </p>
-              </div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-xl font-semibold text-zinc-900 dark:text-white">
+                      {t("usageRecordsTitle")}
+                    </h3>
+                    <HelpHint text={t("usageRecordsTitleHelp")} />
+                  </div>
+                  <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+                    {t("pricingUpdatedAt", {
+                      time: latestPricingRefreshAt
+                        ? new Intl.DateTimeFormat(locale, {
+                            month: "2-digit",
+                            day: "2-digit",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          }).format(latestPricingRefreshAt)
+                        : t("pricingUnknown"),
+                    })}
+                  </p>
+                </div>
               <form action={refreshPricingAction}>
                 <button
                   type="submit"
@@ -507,9 +533,12 @@ export default async function DashboardPage({ searchParams }: PageProps) {
           <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
             <div className="relative overflow-hidden rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-white/5">
               <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-blue-500/10 blur-2xl" />
-              <h3 className="mb-2 text-sm font-medium text-zinc-500 dark:text-zinc-400">
-                {t("points")}
-              </h3>
+              <div className="mb-2 flex items-center gap-1.5">
+                <h3 className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
+                  {t("points")}
+                </h3>
+                <HelpHint text={t("pointsHelp")} />
+              </div>
               <div className="flex items-baseline gap-2">
                 <span className="text-4xl font-bold tracking-tight text-zinc-900 dark:text-white">
                   {formatPoints(user.points)}
@@ -524,9 +553,12 @@ export default async function DashboardPage({ searchParams }: PageProps) {
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
           <div className="space-y-6 lg:col-span-2">
             <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-white/5">
-              <h3 className="mb-6 text-xl font-semibold text-zinc-900 dark:text-white">
-                {t("yourTokens")}
-              </h3>
+              <div className="mb-6 flex items-center gap-2">
+                <h3 className="text-xl font-semibold text-zinc-900 dark:text-white">
+                  {t("yourTokens")}
+                </h3>
+                <HelpHint text={t("yourTokensHelp")} />
+              </div>
               <div className="min-h-[20rem] max-h-[34rem] resize-y overflow-y-auto pr-2">
                 <TokenList
                   tokens={providedTokens}
@@ -547,15 +579,24 @@ export default async function DashboardPage({ searchParams }: PageProps) {
                   nextPageText={t("nextPage")}
                   pageLabelText={t("pageLabel")}
                   modelsText={t("modelsText")}
+                  helpTexts={{
+                    providerFilter: t("providerFilterHelp"),
+                    statusFilter: t("statusFilterHelp"),
+                    contributed: t("contributedHelp"),
+                    creditLimit: t("creditLimitHelp"),
+                  }}
                 />
               </div>
             </div>
 
             <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-white/5">
               <div className="mb-6">
-                <h3 className="text-xl font-semibold text-zinc-900 dark:text-white">
-                  {t("contributionRecordsTitle")}
-                </h3>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-xl font-semibold text-zinc-900 dark:text-white">
+                    {t("contributionRecordsTitle")}
+                  </h3>
+                  <HelpHint text={t("contributionRecordsTitleHelp")} />
+                </div>
                 <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
                   {t("contributionRecordsTip")}
                 </p>
@@ -575,6 +616,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
           <div className="lg:col-span-1">
             <AddTokenForm
               title={t("addToken")}
+              titleHelp={t("addTokenHelp")}
               platformLabel={t("platform")}
               apiKeyLabel={t("apiKey")}
               submitText={t("submitToken")}
@@ -597,6 +639,19 @@ export default async function DashboardPage({ searchParams }: PageProps) {
               customOutputPriceLabel={t("customOutputPrice")}
               addModelText={t("addModel")}
               removeModelText={t("removeModel")}
+              helpTexts={{
+                platform: t("platformHelp"),
+                apiKey: t("apiKeyHelp"),
+                creditLimit: t("creditLimitHelp"),
+                allowedUsers: t("allowedUsersHelp"),
+                customProviderName: t("customProviderNameHelp"),
+                customBaseUrl: t("customBaseUrlHelp"),
+                customModels: t("customModelsHelp"),
+                customModelId: t("customModelIdHelp"),
+                customModelName: t("customModelNameHelp"),
+                customInputPrice: t("customInputPriceHelp"),
+                customOutputPrice: t("customOutputPriceHelp"),
+              }}
             />
           </div>
           </div>

@@ -3,6 +3,7 @@
 import { useEffect, useState, useTransition } from "react";
 import { Check, Copy, RefreshCw } from "lucide-react";
 import { useRouter } from "next/navigation";
+import HelpHint from "./HelpHint";
 
 export default function PlatformKeyCard({
   platformKey,
@@ -11,6 +12,7 @@ export default function PlatformKeyCard({
   resetDoneText,
   confirmResetText,
   label,
+  labelHelpText,
 }: {
   platformKey: string;
   copyText: string;
@@ -18,6 +20,7 @@ export default function PlatformKeyCard({
   resetDoneText: string;
   confirmResetText: string;
   label: string;
+  labelHelpText: string;
 }) {
   const router = useRouter();
   const [copied, setCopied] = useState(false);
@@ -73,7 +76,10 @@ export default function PlatformKeyCard({
     <div className="relative overflow-hidden p-6 rounded-2xl bg-white dark:bg-white/5 border border-zinc-200 dark:border-white/10 shadow-sm flex flex-col justify-between">
       <div className="pointer-events-none absolute top-0 right-0 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl -mr-10 -mt-10"></div>
       <div className="relative z-10 flex justify-between items-center">
-        <h3 className="text-sm font-medium text-zinc-500 dark:text-zinc-400 mb-2">{label}</h3>
+        <div className="mb-2 flex items-center gap-1.5">
+          <h3 className="text-sm font-medium text-zinc-500 dark:text-zinc-400">{label}</h3>
+          <HelpHint text={labelHelpText} />
+        </div>
         <button
           type="button"
           onClick={handleReset}

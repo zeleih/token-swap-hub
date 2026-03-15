@@ -4,6 +4,7 @@ import { useActionState, useState } from "react";
 import { addTokenAction } from "@/actions/token";
 import { serializeCustomModelsConfig } from "@/lib/custom-models";
 import type { FormState } from "@/lib/form-state";
+import HelpHint from "./HelpHint";
 
 type CustomModelDraft = {
   id: string;
@@ -23,6 +24,7 @@ function createEmptyModel(): CustomModelDraft {
 
 export default function AddTokenForm({
   title,
+  titleHelp,
   platformLabel,
   apiKeyLabel,
   submitText,
@@ -45,8 +47,10 @@ export default function AddTokenForm({
   customOutputPriceLabel,
   addModelText,
   removeModelText,
+  helpTexts,
 }: {
   title: string;
+  titleHelp: string;
   platformLabel: string;
   apiKeyLabel: string;
   submitText: string;
@@ -69,13 +73,29 @@ export default function AddTokenForm({
   customOutputPriceLabel: string;
   addModelText: string;
   removeModelText: string;
+  helpTexts: {
+    platform: string;
+    apiKey: string;
+    creditLimit: string;
+    allowedUsers: string;
+    customProviderName: string;
+    customBaseUrl: string;
+    customModels: string;
+    customModelId: string;
+    customModelName: string;
+    customInputPrice: string;
+    customOutputPrice: string;
+  };
 }) {
   const [state, action, isPending] = useActionState(addTokenAction, undefined);
   const formResetKey = state?.resetToken || "initial";
 
   return (
     <div className="bg-white dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-2xl p-6 shadow-sm">
-      <h3 className="text-xl font-semibold text-zinc-900 dark:text-white mb-4">{title}</h3>
+      <div className="mb-4 flex items-center gap-2">
+        <h3 className="text-xl font-semibold text-zinc-900 dark:text-white">{title}</h3>
+        <HelpHint text={titleHelp} />
+      </div>
 
       <FormBody
         key={formResetKey}
@@ -104,6 +124,7 @@ export default function AddTokenForm({
         customOutputPriceLabel={customOutputPriceLabel}
         addModelText={addModelText}
         removeModelText={removeModelText}
+        helpTexts={helpTexts}
       />
     </div>
   );
@@ -135,6 +156,7 @@ function FormBody({
   customOutputPriceLabel,
   addModelText,
   removeModelText,
+  helpTexts,
 }: {
   action: (formData: FormData) => void;
   state: FormState | undefined;
@@ -161,6 +183,19 @@ function FormBody({
   customOutputPriceLabel: string;
   addModelText: string;
   removeModelText: string;
+  helpTexts: {
+    platform: string;
+    apiKey: string;
+    creditLimit: string;
+    allowedUsers: string;
+    customProviderName: string;
+    customBaseUrl: string;
+    customModels: string;
+    customModelId: string;
+    customModelName: string;
+    customInputPrice: string;
+    customOutputPrice: string;
+  };
 }) {
   const [provider, setProvider] = useState<"openai" | "custom">("openai");
   const [customModels, setCustomModels] = useState<CustomModelDraft[]>([createEmptyModel()]);
@@ -183,6 +218,13 @@ function FormBody({
       )
   );
 
+  const renderLabel = (text: string, helpText: string) => (
+    <span className="mb-2 flex items-center gap-1.5 text-sm font-medium text-zinc-500 dark:text-zinc-400">
+      <span>{text}</span>
+      <HelpHint text={helpText} />
+    </span>
+  );
+
   return (
       <form action={action} className="space-y-4">
         {state?.error && (
@@ -198,7 +240,8 @@ function FormBody({
         )}
 
         <div>
-          <label className="block text-sm font-medium text-zinc-500 dark:text-zinc-400 mb-2">{platformLabel}</label>
+          <label className="block">
+            {renderLabel(platformLabel, helpTexts.platform)}
           <select
             name="provider"
             value={provider}
@@ -208,10 +251,12 @@ function FormBody({
             <option value="openai">OpenAI (GPT)</option>
             <option value="custom">自定义 / Custom</option>
           </select>
+          </label>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-zinc-500 dark:text-zinc-400 mb-2">{apiKeyLabel}</label>
+          <label className="block">
+            {renderLabel(apiKeyLabel, helpTexts.apiKey)}
           <input
             name="key"
             required
@@ -219,12 +264,14 @@ function FormBody({
             className="w-full px-4 py-3 bg-zinc-50 dark:bg-black/40 border border-zinc-200 dark:border-white/10 rounded-xl text-zinc-900 dark:text-white outline-none focus:border-blue-500/50 placeholder-zinc-400 dark:placeholder-zinc-600"
             placeholder="sk-..."
           />
+          </label>
         </div>
 
         {provider === "custom" && (
           <>
             <div>
-              <label className="block text-sm font-medium text-zinc-500 dark:text-zinc-400 mb-2">{customProviderNameLabel}</label>
+              <label className="block">
+                {renderLabel(customProviderNameLabel, helpTexts.customProviderName)}
               <input
                 name="customProviderName"
                 required
@@ -232,10 +279,12 @@ function FormBody({
                 className="w-full px-4 py-3 bg-zinc-50 dark:bg-black/40 border border-zinc-200 dark:border-white/10 rounded-xl text-zinc-900 dark:text-white outline-none focus:border-blue-500/50 placeholder-zinc-400 dark:placeholder-zinc-600"
                 placeholder={customProviderNamePlaceholder}
               />
+              </label>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-zinc-500 dark:text-zinc-400 mb-2">{customBaseUrlLabel}</label>
+              <label className="block">
+                {renderLabel(customBaseUrlLabel, helpTexts.customBaseUrl)}
               <input
                 name="customBaseUrl"
                 required
@@ -243,12 +292,16 @@ function FormBody({
                 className="w-full px-4 py-3 bg-zinc-50 dark:bg-black/40 border border-zinc-200 dark:border-white/10 rounded-xl text-zinc-900 dark:text-white outline-none focus:border-blue-500/50 placeholder-zinc-400 dark:placeholder-zinc-600"
                 placeholder={customBaseUrlPlaceholder}
               />
+              </label>
             </div>
 
             <div className="space-y-3 rounded-2xl border border-zinc-200 bg-zinc-50/70 p-4 dark:border-white/10 dark:bg-black/20">
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <h4 className="text-sm font-semibold text-zinc-900 dark:text-white">{customModelsTitle}</h4>
+                  <div className="flex items-center gap-1.5">
+                    <h4 className="text-sm font-semibold text-zinc-900 dark:text-white">{customModelsTitle}</h4>
+                    <HelpHint text={helpTexts.customModels} />
+                  </div>
                   <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">{customModelsTip}</p>
                 </div>
                 <button
@@ -267,7 +320,11 @@ function FormBody({
                   <div key={index} className="rounded-xl border border-zinc-200 bg-white p-3 dark:border-white/10 dark:bg-black/30">
                     <div className="grid gap-3 md:grid-cols-2">
                       <div>
-                        <label className="mb-2 block text-xs font-medium text-zinc-500 dark:text-zinc-400">{customModelIdLabel}</label>
+                        <label className="block">
+                          <span className="mb-2 flex items-center gap-1.5 text-xs font-medium text-zinc-500 dark:text-zinc-400">
+                            <span>{customModelIdLabel}</span>
+                            <HelpHint text={helpTexts.customModelId} />
+                          </span>
                         <input
                           type="text"
                           value={model.id}
@@ -280,10 +337,15 @@ function FormBody({
                           className="w-full rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-900 outline-none dark:border-white/10 dark:bg-black/40 dark:text-white"
                           placeholder="gpt-4o-mini"
                         />
+                        </label>
                       </div>
 
                       <div>
-                        <label className="mb-2 block text-xs font-medium text-zinc-500 dark:text-zinc-400">{customModelNameLabel}</label>
+                        <label className="block">
+                          <span className="mb-2 flex items-center gap-1.5 text-xs font-medium text-zinc-500 dark:text-zinc-400">
+                            <span>{customModelNameLabel}</span>
+                            <HelpHint text={helpTexts.customModelName} />
+                          </span>
                         <input
                           type="text"
                           value={model.name}
@@ -296,10 +358,15 @@ function FormBody({
                           className="w-full rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-900 outline-none dark:border-white/10 dark:bg-black/40 dark:text-white"
                           placeholder="GPT-4o mini"
                         />
+                        </label>
                       </div>
 
                       <div>
-                        <label className="mb-2 block text-xs font-medium text-zinc-500 dark:text-zinc-400">{customInputPriceLabel}</label>
+                        <label className="block">
+                          <span className="mb-2 flex items-center gap-1.5 text-xs font-medium text-zinc-500 dark:text-zinc-400">
+                            <span>{customInputPriceLabel}</span>
+                            <HelpHint text={helpTexts.customInputPrice} />
+                          </span>
                         <input
                           type="number"
                           min="0"
@@ -314,10 +381,15 @@ function FormBody({
                           className="w-full rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-900 outline-none dark:border-white/10 dark:bg-black/40 dark:text-white"
                           placeholder="0.15"
                         />
+                        </label>
                       </div>
 
                       <div>
-                        <label className="mb-2 block text-xs font-medium text-zinc-500 dark:text-zinc-400">{customOutputPriceLabel}</label>
+                        <label className="block">
+                          <span className="mb-2 flex items-center gap-1.5 text-xs font-medium text-zinc-500 dark:text-zinc-400">
+                            <span>{customOutputPriceLabel}</span>
+                            <HelpHint text={helpTexts.customOutputPrice} />
+                          </span>
                         <input
                           type="number"
                           min="0"
@@ -332,6 +404,7 @@ function FormBody({
                           className="w-full rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-900 outline-none dark:border-white/10 dark:bg-black/40 dark:text-white"
                           placeholder="0.60"
                         />
+                        </label>
                       </div>
                     </div>
 
@@ -360,7 +433,8 @@ function FormBody({
         )}
 
         <div>
-          <label className="block text-sm font-medium text-zinc-500 dark:text-zinc-400 mb-2">{creditLimitLabel}</label>
+          <label className="block">
+            {renderLabel(creditLimitLabel, helpTexts.creditLimit)}
           <div className="relative">
             <input
               name="creditLimit"
@@ -374,16 +448,19 @@ function FormBody({
               pts
             </span>
           </div>
+          </label>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-zinc-500 dark:text-zinc-400 mb-2">{allowedUsersLabel}</label>
+          <label className="block">
+            {renderLabel(allowedUsersLabel, helpTexts.allowedUsers)}
           <input
             name="allowedUsers"
             className="w-full px-4 py-3 bg-zinc-50 dark:bg-black/40 border border-zinc-200 dark:border-white/10 rounded-xl text-zinc-900 dark:text-white outline-none focus:border-blue-500/50 placeholder-zinc-400 dark:placeholder-zinc-600"
             placeholder={allowedUsersPlaceholder}
           />
           <p className="text-xs text-amber-500 mt-1">{allowedUsersTip}</p>
+          </label>
         </div>
 
         <button

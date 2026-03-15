@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { deleteTokenAction, toggleTokenAction } from "@/actions/token";
+import HelpHint from "./HelpHint";
 
 type TokenItem = {
   id: string;
@@ -63,6 +64,7 @@ export default function TokenList({
   nextPageText,
   pageLabelText,
   modelsText,
+  helpTexts,
 }: {
   tokens: TokenItem[];
   noTokensText: string;
@@ -82,6 +84,12 @@ export default function TokenList({
   nextPageText: string;
   pageLabelText: string;
   modelsText: string;
+  helpTexts: {
+    providerFilter: string;
+    statusFilter: string;
+    contributed: string;
+    creditLimit: string;
+  };
 }) {
   const [isPending, startTransition] = useTransition();
   const [providerFilter, setProviderFilter] = useState("all");
@@ -124,7 +132,10 @@ export default function TokenList({
     <div className="space-y-5">
       <div className="flex flex-wrap items-end gap-3">
         <label className="flex min-w-[180px] flex-col gap-2 text-sm text-zinc-500 dark:text-zinc-400">
-          <span>{providerFilterLabel}</span>
+          <span className="flex items-center gap-1.5">
+            <span>{providerFilterLabel}</span>
+            <HelpHint text={helpTexts.providerFilter} />
+          </span>
           <select
             value={providerFilter}
             onChange={(event) => {
@@ -143,7 +154,10 @@ export default function TokenList({
         </label>
 
         <label className="flex min-w-[180px] flex-col gap-2 text-sm text-zinc-500 dark:text-zinc-400">
-          <span>{statusFilterLabel}</span>
+          <span className="flex items-center gap-1.5">
+            <span>{statusFilterLabel}</span>
+            <HelpHint text={helpTexts.statusFilter} />
+          </span>
           <select
             value={statusFilter}
             onChange={(event) => {
@@ -221,13 +235,19 @@ export default function TokenList({
 
                   <div className="mb-3 space-y-1 text-xs text-zinc-500 dark:text-zinc-400">
                     <div className="flex justify-between gap-3">
-                      <span>{contributedText}</span>
+                      <span className="flex items-center gap-1.5">
+                        <span>{contributedText}</span>
+                        <HelpHint text={helpTexts.contributed} />
+                      </span>
                       <span className="font-medium text-zinc-700 dark:text-zinc-300">
                         {formatMillions(usedTokens || 0)}
                       </span>
                     </div>
                     <div className="flex justify-between gap-3">
-                      <span>{creditLimitText}</span>
+                      <span className="flex items-center gap-1.5">
+                        <span>{creditLimitText}</span>
+                        <HelpHint text={helpTexts.creditLimit} />
+                      </span>
                       <span className="font-medium text-zinc-700 dark:text-zinc-300">
                         {limit !== null
                           ? `${formatCredits(usedCredits)} / ${formatCredits(limit)}`

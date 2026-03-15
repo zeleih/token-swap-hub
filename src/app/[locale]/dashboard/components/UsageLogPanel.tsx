@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import HelpHint from "./HelpHint";
 
 type UsageLogType = "usage" | "provided" | "directedUsage" | "directedProvided";
 type UsageLogFilter = "all" | UsageLogType;
@@ -42,6 +43,18 @@ type UsageLogTexts = {
   costHeader: string;
   pointsHeader: string;
   statusHeader: string;
+  helpTexts: {
+    providerFilter: string;
+    time: string;
+    type: string;
+    provider: string;
+    model: string;
+    tokens: string;
+    price: string;
+    cost: string;
+    points: string;
+    status: string;
+  };
 };
 
 const PAGE_SIZE = 10;
@@ -132,7 +145,10 @@ export default function UsageLogPanel({
         </div>
 
         <label className="ml-auto flex min-w-[180px] flex-col gap-2 text-sm text-zinc-500 dark:text-zinc-400">
-          <span>{texts.providerFilterLabel}</span>
+          <span className="flex items-center gap-1.5">
+            <span>{texts.providerFilterLabel}</span>
+            <HelpHint text={texts.helpTexts.providerFilter} />
+          </span>
           <select
             value={providerFilter}
             onChange={(event) => {
@@ -159,15 +175,15 @@ export default function UsageLogPanel({
         <>
           <div className="overflow-x-auto rounded-2xl border border-zinc-200 dark:border-white/10">
             <div className="hidden min-w-[980px] grid-cols-[88px_96px_84px_minmax(0,1.2fr)_148px_168px_92px_96px_78px] gap-2 border-b border-zinc-200 bg-zinc-50 px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-zinc-500 dark:border-white/10 dark:bg-white/5 dark:text-zinc-400 md:grid">
-              <span>{texts.timeHeader}</span>
-              <span>{texts.typeHeader}</span>
-              <span>{texts.providerHeader}</span>
-              <span>{texts.modelHeader}</span>
-              <span>{texts.tokensHeader}</span>
-              <span>{texts.priceHeader}</span>
-              <span>{texts.costHeader}</span>
-              <span>{texts.pointsHeader}</span>
-              <span>{texts.statusHeader}</span>
+              <span className="flex items-center gap-1">{texts.timeHeader}<HelpHint text={texts.helpTexts.time} /></span>
+              <span className="flex items-center gap-1">{texts.typeHeader}<HelpHint text={texts.helpTexts.type} /></span>
+              <span className="flex items-center gap-1">{texts.providerHeader}<HelpHint text={texts.helpTexts.provider} /></span>
+              <span className="flex items-center gap-1">{texts.modelHeader}<HelpHint text={texts.helpTexts.model} /></span>
+              <span className="flex items-center gap-1">{texts.tokensHeader}<HelpHint text={texts.helpTexts.tokens} /></span>
+              <span className="flex items-center gap-1">{texts.priceHeader}<HelpHint text={texts.helpTexts.price} /></span>
+              <span className="flex items-center gap-1">{texts.costHeader}<HelpHint text={texts.helpTexts.cost} /></span>
+              <span className="flex items-center gap-1">{texts.pointsHeader}<HelpHint text={texts.helpTexts.points} /></span>
+              <span className="flex items-center gap-1">{texts.statusHeader}<HelpHint text={texts.helpTexts.status} /></span>
             </div>
 
             <ul className="divide-y divide-zinc-200 dark:divide-white/10">
