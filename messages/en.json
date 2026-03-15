@@ -28,8 +28,8 @@
     "points": "Credits",
     "pointsUnit": "pts",
     "pointsExcludeDirected": "Excludes directed usage",
-    "yourTokens": "Tokens Provided",
-    "addToken": "Add Token",
+    "yourTokens": "Token Sources",
+    "addToken": "Add Token Source",
     "usage": "Usage Log",
     "directedUsage": "Directed Usage Log",
     "directedUsageTip": "Directed usage is not counted in total quota, credits, or rankings",
@@ -50,7 +50,7 @@
     "confirmRevoke": "Are you sure you want to stop sharing this token?",
     "platform": "Platform",
     "apiKey": "API Key",
-    "submitToken": "Submit Token",
+    "submitToken": "Submit Token Source",
     "validating": "Validating & Adding...",
     "tokenAdded": "Token added securely!",
     "usageLimit": "Usage Limit",
@@ -98,6 +98,6 @@
     "unlimitedText": "Unlimited",
     "announcement": "Announcements",
     "announcementTitle": "⚠️ Platform in Testing — Your Feedback Matters",
-    "announcementContent": "🚧 The platform is currently in testing. Some features may be unstable.\n\n📩 If you find any bugs, email hhuhzl@outlook.com with details. Confirmed valid bugs will be rewarded with tokens!\n\n---\n\n📌 Platform Features:\n🔑 Share Tokens → Earn credits\n💎 Spend credits → Use collective AI power\n🎯 Directed sharing → Friends use for free, no credits or rankings impact\n🏆 Leaderboard → See community rankings (excludes directed)\n🌐 Supported: OpenAI / DeepSeek / Zhipu / Moonshot / Qwen / Claude / Gemini / Groq / Mistral\n\nThank you for your participation and support!"
+    "announcementContent": "🚧 The platform is currently in testing. Some features may be unstable.\n\n📩 If you find any bugs, email hhuhzl@outlook.com with details. Confirmed valid bugs will be rewarded with tokens!\n\n---\n\n📌 Platform Features:\n🔑 Share Tokens → Earn credits\n💎 Spend credits → Use collective AI power\n🎯 Directed sharing → Friends use for free, no credits or rankings impact\n🏆 Leaderboard → See community rankings (excludes directed)\n🌐 Supported: OpenAI / DeepSeek / Zhipu / Moonshot / Qwen / Claude / Gemini / Grok / Mistral\n\nThank you for your participation and support!"
   }
 }

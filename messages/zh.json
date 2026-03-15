@@ -28,8 +28,8 @@
     "points": "信用点数",
     "pointsUnit": "pts",
     "pointsExcludeDirected": "不含定向开放的使用",
-    "yourTokens": "提供的 Token",
-    "addToken": "添加 Token",
+    "yourTokens": "提供的 Token 源",
+    "addToken": "添加 Token 源",
     "usage": "使用记录",
     "directedUsage": "定向使用记录",
     "directedUsageTip": "定向开放的使用不计入总额度、不影响信用点数和排名",
@@ -50,7 +50,7 @@
     "confirmRevoke": "确定要停止共享该 Token 吗？",
     "platform": "平台",
     "apiKey": "API Key",
-    "submitToken": "提交 Token",
+    "submitToken": "提交 Token 源",
     "validating": "正在验证并添加...",
     "tokenAdded": "Token 已安全添加！",
     "usageLimit": "使用上限",
@@ -98,6 +98,6 @@
     "unlimitedText": "无限制",
     "announcement": "公告",
     "announcementTitle": "⚠️ 平台测试中 — 欢迎体验与反馈",
-    "announcementContent": "🚧 当前平台处于测试阶段，功能可能存在不稳定的情况。\n\n📩 如果您发现了任何 Bug，请发送邮件至 hhuhzl@outlook.com 描述问题。经确认的有效 Bug 将获得 Token 奖励！\n\n---\n\n📌 平台功能简介：\n🔑 分享您的 Token → 赚取信用点数\n💎 消耗信用点数 → 使用共享池的 AI 能力\n🎯 定向开放 → 指定好友免费使用，双方不计费、不计排名\n🏆 排行榜 → 查看社区贡献与消费排名（不含定向）\n🌐 支持：OpenAI / DeepSeek / 智谱 / Moonshot / 通义千问 / Claude / Gemini / Groq / Mistral\n\n感谢您的参与和支持！"
+    "announcementContent": "🚧 当前平台处于测试阶段，功能可能存在不稳定的情况。\n\n📩 如果您发现了任何 Bug，请发送邮件至 hhuhzl@outlook.com 描述问题。经确认的有效 Bug 将获得 Token 奖励！\n\n---\n\n📌 平台功能简介：\n🔑 分享您的 Token → 赚取信用点数\n💎 消耗信用点数 → 使用共享池的 AI 能力\n🎯 定向开放 → 指定好友免费使用，双方不计费、不计排名\n🏆 排行榜 → 查看社区贡献与消费排名（不含定向）\n🌐 支持：OpenAI / DeepSeek / 智谱 / Moonshot / 通义千问 / Claude / Gemini / Grok / Mistral\n\n感谢您的参与和支持！"
   }
 }

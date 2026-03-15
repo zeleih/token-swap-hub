@@ -6,6 +6,7 @@ import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
 import DashboardActions from "./components/DashboardActions";
 import ThemeToggle from "@/components/ThemeToggle";
+import LanguageToggle from "@/components/LanguageToggle";
 import Sidebar from "@/components/Sidebar";
 
 export default async function DashboardLayout({
@@ -72,6 +73,7 @@ export default async function DashboardLayout({
                 />
               )}
               <ThemeToggle />
+              <LanguageToggle />
               <span className="text-sm text-zinc-500 dark:text-zinc-400 hidden sm:inline ml-2">
                 {user?.displayName || user?.username}
               </span>

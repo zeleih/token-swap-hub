@@ -13,6 +13,7 @@ export default function TokenList({
   resumeText,
   usageLimitText,
   unlimitedText,
+  directedBadge,
 }: {
   tokens: any[];
   noTokensText: string;
@@ -23,6 +24,7 @@ export default function TokenList({
   resumeText: string;
   usageLimitText: string;
   unlimitedText: string;
+  directedBadge: string;
 }) {
   const [isPending, startTransition] = useTransition();
 
@@ -62,9 +64,16 @@ export default function TokenList({
           }`}>
             <div className="flex justify-between items-start mb-3">
               <div>
+              <div className="flex items-center gap-1.5 flex-wrap">
                 <span className="text-xs font-semibold px-2 py-1 rounded bg-blue-500/10 text-blue-600 dark:text-blue-400 uppercase tracking-wider">
                   {token.provider}
                 </span>
+                {token.allowedUsers && (
+                  <span className="text-xs font-medium px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-600 dark:text-cyan-400">
+                    [{directedBadge}]
+                  </span>
+                )}
+              </div>
                 <p className="font-mono text-sm text-zinc-800 dark:text-zinc-200 mt-2 truncate w-32">
                   ...{token.key.slice(-4)}
                 </p>

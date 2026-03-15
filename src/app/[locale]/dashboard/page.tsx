@@ -22,16 +22,10 @@ export default async function DashboardPage() {
 
   if (!user) return null;
 
-  // Fetch usage logs split by directed/normal
-  const normalLogs = await prisma.requestLog.findMany({
-    where: { consumerId: userId, isDirected: false },
-    take: 5,
-    orderBy: { createdAt: "desc" }
-  });
-
-  const directedLogs = await prisma.requestLog.findMany({
-    where: { consumerId: userId, isDirected: true },
-    take: 5,
+  // Fetch recent usage logs (both normal and directed, merged)
+  const recentLogs = await prisma.requestLog.findMany({
+    where: { consumerId: userId },
+    take: 10,
     orderBy: { createdAt: "desc" }
   });
 
@@ -76,7 +70,7 @@ export default async function DashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
         <div className="lg:col-span-2 space-y-6">
-          {/* Token List */}
+          {/* Token Source List */}
           <div className="bg-white dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-2xl p-6 shadow-sm">
             <h3 className="text-xl font-semibold text-zinc-900 dark:text-white mb-6">{t("yourTokens")}</h3>
             <TokenList
@@ -89,45 +83,35 @@ export default async function DashboardPage() {
               resumeText={t("resumeToken")}
               usageLimitText={t("usageLimit")}
               unlimitedText={t("unlimitedText")}
+              directedBadge={t("directedLabel")}
             />
           </div>
 
-          {/* Normal Usage Log */}
+          {/* Usage Log (merged: normal + directed with different colors) */}
           <div className="bg-white dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-2xl p-6 shadow-sm">
             <h3 className="text-xl font-semibold text-zinc-900 dark:text-white mb-6">{t("usage")}</h3>
-            {normalLogs.length === 0 ? (
+            {recentLogs.length === 0 ? (
               <p className="text-sm text-zinc-500">{t("noLogs")}</p>
             ) : (
               <ul className="divide-y divide-zinc-200 dark:divide-white/10">
-                {normalLogs.map((req: any) => (
+                {recentLogs.map((req: any) => (
                   <li key={req.id} className="py-3 flex justify-between items-center text-sm">
-                    <span className="text-zinc-600 dark:text-zinc-300">{t("spent", { count: req.tokensUsed })}</span>
-                    <span className={`px-2 py-1 rounded text-xs font-medium ${req.status === 'SUCCESS' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500'}`}>
-                      {req.status}
+                    <span className="text-zinc-600 dark:text-zinc-300">
+                      {req.isDirected
+                        ? t("directedSpent", { count: req.tokensUsed })
+                        : t("spent", { count: req.tokensUsed })
+                      }
                     </span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-
-          {/* Directed Usage Log */}
-          <div className="bg-white dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-2xl p-6 shadow-sm">
-            <div className="flex items-center gap-2 mb-6">
-              <span className="text-lg">🎯</span>
-              <h3 className="text-xl font-semibold text-zinc-900 dark:text-white">{t("directedUsage")}</h3>
-            </div>
-            <p className="text-xs text-zinc-400 mb-4">{t("directedUsageTip")}</p>
-            {directedLogs.length === 0 ? (
-              <p className="text-sm text-zinc-500">{t("noDirectedLogs")}</p>
-            ) : (
-              <ul className="divide-y divide-zinc-200 dark:divide-white/10">
-                {directedLogs.map((req: any) => (
-                  <li key={req.id} className="py-3 flex justify-between items-center text-sm">
-                    <span className="text-zinc-600 dark:text-zinc-300">{t("directedSpent", { count: req.tokensUsed })}</span>
-                    <span className="px-2 py-1 rounded text-xs font-medium bg-blue-500/10 text-blue-500">
-                      {t("directedLabel")}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      {req.isDirected && (
+                        <span className="px-2 py-0.5 rounded text-xs font-medium bg-blue-500/10 text-blue-500">
+                          {t("directedLabel")}
+                        </span>
+                      )}
+                      <span className={`px-2 py-1 rounded text-xs font-medium ${req.status === 'SUCCESS' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500'}`}>
+                        {req.status}
+                      </span>
+                    </div>
                   </li>
                 ))}
               </ul>
@@ -149,7 +133,7 @@ export default async function DashboardPage() {
           </div>
         </div>
 
-        {/* Right: Add Token */}
+        {/* Right: Add Token Source */}
         <div className="lg:col-span-1">
            <AddTokenForm
              title={t("addToken")}

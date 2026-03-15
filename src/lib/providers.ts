@@ -8,7 +8,7 @@ const PROVIDERS: Record<string, { baseUrl: string; prefix?: string }> = {
   qwen: { baseUrl: "https://dashscope.aliyuncs.com/compatible-mode/v1", prefix: "sk-" },
   claude: { baseUrl: "https://api.anthropic.com/v1" },
   gemini: { baseUrl: "https://generativelanguage.googleapis.com/v1beta/openai" },
-  groq: { baseUrl: "https://api.groq.com/openai/v1", prefix: "gsk_" },
+  grok: { baseUrl: "https://api.x.ai/v1", prefix: "xai-" },
   mistral: { baseUrl: "https://api.mistral.ai/v1" },
   custom: { baseUrl: "" },
 };

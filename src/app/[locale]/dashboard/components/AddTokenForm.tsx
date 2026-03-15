@@ -93,7 +93,7 @@ export default function AddTokenForm({
               <option value="qwen">通义千问 Qwen</option>
               <option value="claude">Anthropic Claude</option>
               <option value="gemini">Google Gemini</option>
-              <option value="groq">Groq</option>
+              <option value="grok">xAI Grok</option>
               <option value="mistral">Mistral AI</option>
               <option value="custom">自定义 / Custom</option>
             </select>
