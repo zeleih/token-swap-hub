@@ -1,5 +1,22 @@
 # 更新日志 — Token 共享平台
 
+## v4 — 2026-03-15
+
+### 新增功能
+- ✅ **多平台支持**: OpenAI / DeepSeek / 智谱 GLM / Moonshot / 通义千问 / Claude / Gemini / Groq / Mistral / 自定义
+- ✅ **Token 暂停开关**: 用户可暂停/恢复 Token 共享，PAUSED 状态不会被代理选中
+- ✅ **Token 用量展示**: 进度条显示已用量 / 上限，无限制时标注"无限制"
+- ✅ **公告更新**: 测试阶段提示 + Bug 赏金邮箱 (hhuhzl@outlook.com)
+
+### Bug 修复
+- ✅ **登录报错**: Prisma Client 缓存未更新导致服务端异常
+
+### 改进
+- ✅ 取消 API Key 的 `sk-` 前缀强制限制，适配不同平台
+- ✅ 平台配置独立到 `src/lib/providers.ts`
+
+---
+
 ## v3 — 2026-03-15
 
 ### 新增功能
