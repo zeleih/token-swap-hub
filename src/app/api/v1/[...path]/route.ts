@@ -33,30 +33,38 @@ async function handleProxy(req: NextRequest, params: { path: string[] }) {
     return NextResponse.json({ error: "Insufficient points. Earn more by sharing tokens!" }, { status: 402 });
   }
 
-  // Pick a provider Token with filtering
+  // Pick a token: only consumer's own tokens + tokens directed to consumer + admin supply tokens
   const allActiveTokens = await prisma.tokenKey.findMany({
     where: { status: "ACTIVE" },
     include: { user: { select: { username: true } } }
   });
 
-  // Filter: skip tokens that hit usage limit or not in allowedUsers whitelist
   const consumer_username = (consumer as any).username;
   const availableTokens = allActiveTokens.filter((token: any) => {
     // Check usage limit
     if (token.usageLimit !== null && token.totalUsedTokens >= token.usageLimit) return false;
-    // Check allowed users whitelist
+
+    // Rule 1: Consumer's own tokens are always available
+    if (token.userId === consumer.id) return true;
+
+    // Rule 2: Admin supply (public pool) tokens are available to everyone
+    if (token.isAdminSupply) return true;
+
+    // Rule 3: Tokens directed to this consumer (allowor whitelist)
     if (token.allowedUsers) {
       const allowed = token.allowedUsers.split(",").map((u: string) => u.trim().toLowerCase());
-      if (!allowed.includes(consumer_username.toLowerCase())) return false;
+      if (allowed.includes(consumer_username.toLowerCase())) return true;
     }
-    return true;
+
+    // Otherwise: not available (don't use other people's tokens)
+    return false;
   });
 
   if (availableTokens.length === 0) {
-    return NextResponse.json({ error: "No active tokens available in the pool." }, { status: 503 });
+    return NextResponse.json({ error: "没有可用的 Token。请先添加自己的 Token，或等待有人向您定向开放。" }, { status: 503 });
   }
 
-  // Simple random picking
+  // Simple random picking among available tokens
   const chosenToken = availableTokens[Math.floor(Math.random() * availableTokens.length)];
   // 定向开放的 Token（有白名单）不赚取信用点数
   const isDirected = !!chosenToken.allowedUsers;
