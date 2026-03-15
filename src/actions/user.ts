@@ -24,6 +24,23 @@ export async function updateProfileAction(prevState: any, formData: FormData) {
   return { success: true };
 }
 
+// 重置平台 Key
+export async function resetPlatformKeyAction() {
+  const session = await verifySession();
+  if (!session) return { error: "Unauthorized" };
+
+  const newKey = "tk_" + Array.from(crypto.getRandomValues(new Uint8Array(24)))
+    .map(b => b.toString(16).padStart(2, '0')).join('');
+
+  await prisma.user.update({
+    where: { id: session.userId },
+    data: { platformKey: newKey }
+  });
+
+  revalidatePath("/dashboard");
+  return { success: true, newKey };
+}
+
 // 赠送积分
 export async function transferPointsAction(prevState: any, formData: FormData) {
   const session = await verifySession();
@@ -73,7 +90,7 @@ export async function transferPointsAction(prevState: any, formData: FormData) {
   return { success: true, message: `成功赠送 ${amount} 点数给 ${toUsername}` };
 }
 
-// 排行榜查询
+// 排行榜查询（排除定向使用）
 export async function getLeaderboardData(range: string) {
   let dateFilter: Date | undefined;
   const now = new Date();
@@ -96,12 +113,16 @@ export async function getLeaderboardData(range: string) {
       dateFilter = undefined;
   }
 
-  const whereClause = dateFilter ? { createdAt: { gte: dateFilter } } : {};
+  const baseWhere = {
+    status: "SUCCESS",
+    isDirected: false, // 排除定向使用
+    ...(dateFilter ? { createdAt: { gte: dateFilter } } : {})
+  };
 
-  // 贡献榜：按 Token 被使用的量排序
+  // 贡献榜：按 Token 被使用的量排序（排除定向）
   const contributionLogs = await prisma.requestLog.groupBy({
     by: ["tokenId"],
-    where: { ...whereClause, status: "SUCCESS" },
+    where: baseWhere,
     _sum: { tokensUsed: true }
   });
 
@@ -131,10 +152,10 @@ export async function getLeaderboardData(range: string) {
     .sort((a, b) => b.total - a.total)
     .slice(0, 20);
 
-  // 消费榜：按用户消费的总量排序
+  // 消费榜：按用户消费的总量排序（排除定向）
   const consumptionLogs = await prisma.requestLog.groupBy({
     by: ["consumerId"],
-    where: { ...whereClause, status: "SUCCESS" },
+    where: baseWhere,
     _sum: { tokensUsed: true }
   });
 

@@ -177,19 +177,21 @@ async function commitBilling(consumerId: string, tokenId: string, providerId: st
   if (tokensUsed <= 0) return;
 
   const ops: any[] = [
-    // 更新 token 使用量（始终记录）
-    prisma.tokenKey.update({
-      where: { id: tokenId },
-      data: { totalUsedTokens: { increment: tokensUsed } }
-    }),
-    // 记录请求日志（始终记录）
+    // 记录请求日志（始终记录，标记是否定向）
     prisma.requestLog.create({
-      data: { consumerId, tokenId, tokensUsed, status: "SUCCESS" }
+      data: { consumerId, tokenId, tokensUsed, isDirected, status: "SUCCESS" }
     })
   ];
 
-  // 定向 Token：消费者不扣点，提供者也不加点
+  // 定向 Token：不计入总额度，不扣分，不加分
   if (!isDirected) {
+    // 更新 token 使用量（仅非定向）
+    ops.push(
+      prisma.tokenKey.update({
+        where: { id: tokenId },
+        data: { totalUsedTokens: { increment: tokensUsed } }
+      })
+    );
     // 扣消费者点数
     ops.push(
       prisma.user.update({

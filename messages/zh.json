@@ -27,13 +27,21 @@
     "logout": "退出登录",
     "points": "信用点数",
     "pointsUnit": "pts",
+    "pointsExcludeDirected": "不含定向开放的使用",
     "yourTokens": "提供的 Token",
     "addToken": "添加 Token",
     "usage": "使用记录",
+    "directedUsage": "定向使用记录",
+    "directedUsageTip": "定向开放的使用不计入总额度、不影响信用点数和排名",
+    "directedSpent": "定向使用了 {count} 个 tokens",
+    "directedLabel": "定向",
+    "noDirectedLogs": "暂无定向使用记录。",
     "platformKey": "平台专用 Key",
     "platformUrl": "平台 API 地址",
     "platformKeyTip": "将此 Key 作为 Bearer token，平台 URL 作为 base URL 填写至您的 AI 客户端。",
     "copy": "复制",
+    "resetKey": "重置",
+    "confirmResetKey": "确认重置？",
     "noLogs": "暂无使用记录。",
     "spent": "消耗了 {count} 个 tokens",
     "noTokens": "您还没有提供任何 Token。",
@@ -87,6 +95,6 @@
     "toolsSubtitle": "额度管理、多平台监控等功能正在开发中。",
     "announcement": "公告",
     "announcementTitle": "🎉 欢迎使用 Token 共享平台",
-    "announcementContent": "本平台帮助您在朋友之间共享闲置的 AI Token。\n\n🔑 分享您的 Token → 赚取信用点数\n💎 消耗信用点数 → 使用共享池的 AI 能力\n🎯 定向开放 → 指定好友免费使用，双方不计费\n🏆 排行榜 → 查看社区贡献与消费排名\n\n如有问题请联系管理员。祝使用愉快！"
+    "announcementContent": "本平台帮助您在朋友之间共享闲置的 AI Token。\n\n🔑 分享您的 Token → 赚取信用点数\n💎 消耗信用点数 → 使用共享池的 AI 能力\n🎯 定向开放 → 指定好友免费使用，双方不计费、不计排名\n🏆 排行榜 → 查看社区贡献与消费排名（不含定向）\n\n如有问题请联系管理员。祝使用愉快！"
   }
 }

@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { verifySession } from "@/lib/session";
 import DashboardCopyKey from "./components/DashboardCopyKey";
+import PlatformKeyCard from "./components/PlatformKeyCard";
 import AddTokenForm from "./components/AddTokenForm";
 import TokenList from "./components/TokenList";
 import { getTranslations } from "next-intl/server";
@@ -16,14 +17,23 @@ export default async function DashboardPage() {
     where: { id: userId },
     include: {
       providedTokens: true,
-      requestsMade: {
-        take: 5,
-        orderBy: { createdAt: "desc" }
-      }
     }
   });
 
   if (!user) return null;
+
+  // Fetch usage logs split by directed/normal
+  const normalLogs = await prisma.requestLog.findMany({
+    where: { consumerId: userId, isDirected: false },
+    take: 5,
+    orderBy: { createdAt: "desc" }
+  });
+
+  const directedLogs = await prisma.requestLog.findMany({
+    where: { consumerId: userId, isDirected: true },
+    take: 5,
+    orderBy: { createdAt: "desc" }
+  });
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -41,14 +51,17 @@ export default async function DashboardPage() {
             </span>
             <span className="text-sm font-medium text-zinc-500 dark:text-zinc-400">{t("pointsUnit")}</span>
           </div>
+          <p className="text-xs text-zinc-400 mt-2">{t("pointsExcludeDirected")}</p>
         </div>
 
-        {/* Platform Key Card */}
-        <div className="relative overflow-hidden p-6 rounded-2xl bg-white dark:bg-white/5 border border-zinc-200 dark:border-white/10 shadow-sm flex flex-col justify-between">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl -mr-10 -mt-10"></div>
-          <h3 className="text-sm font-medium text-zinc-500 dark:text-zinc-400 mb-2">{t("platformKey")}</h3>
-          <DashboardCopyKey platformKey={user.platformKey} copyText={t("copy")} />
-        </div>
+        {/* Platform Key Card with Reset */}
+        <PlatformKeyCard
+          platformKey={user.platformKey}
+          copyText={t("copy")}
+          resetText={t("resetKey")}
+          confirmResetText={t("confirmResetKey")}
+          label={t("platformKey")}
+        />
 
         {/* Platform URL Card */}
         <div className="relative overflow-hidden p-6 rounded-2xl bg-white dark:bg-white/5 border border-zinc-200 dark:border-white/10 shadow-sm flex flex-col justify-between">
@@ -75,18 +88,41 @@ export default async function DashboardPage() {
             />
           </div>
 
-          {/* Usage Log */}
+          {/* Normal Usage Log */}
           <div className="bg-white dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-2xl p-6 shadow-sm">
             <h3 className="text-xl font-semibold text-zinc-900 dark:text-white mb-6">{t("usage")}</h3>
-            {user.requestsMade.length === 0 ? (
+            {normalLogs.length === 0 ? (
               <p className="text-sm text-zinc-500">{t("noLogs")}</p>
             ) : (
               <ul className="divide-y divide-zinc-200 dark:divide-white/10">
-                {user.requestsMade.map((req: any) => (
+                {normalLogs.map((req: any) => (
                   <li key={req.id} className="py-3 flex justify-between items-center text-sm">
                     <span className="text-zinc-600 dark:text-zinc-300">{t("spent", { count: req.tokensUsed })}</span>
                     <span className={`px-2 py-1 rounded text-xs font-medium ${req.status === 'SUCCESS' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500'}`}>
                       {req.status}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          {/* Directed Usage Log */}
+          <div className="bg-white dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-2xl p-6 shadow-sm">
+            <div className="flex items-center gap-2 mb-6">
+              <span className="text-lg">🎯</span>
+              <h3 className="text-xl font-semibold text-zinc-900 dark:text-white">{t("directedUsage")}</h3>
+            </div>
+            <p className="text-xs text-zinc-400 mb-4">{t("directedUsageTip")}</p>
+            {directedLogs.length === 0 ? (
+              <p className="text-sm text-zinc-500">{t("noDirectedLogs")}</p>
+            ) : (
+              <ul className="divide-y divide-zinc-200 dark:divide-white/10">
+                {directedLogs.map((req: any) => (
+                  <li key={req.id} className="py-3 flex justify-between items-center text-sm">
+                    <span className="text-zinc-600 dark:text-zinc-300">{t("directedSpent", { count: req.tokensUsed })}</span>
+                    <span className="px-2 py-1 rounded text-xs font-medium bg-blue-500/10 text-blue-500">
+                      {t("directedLabel")}
                     </span>
                   </li>
                 ))}

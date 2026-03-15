@@ -27,13 +27,21 @@
     "logout": "Logout",
     "points": "Credits",
     "pointsUnit": "pts",
+    "pointsExcludeDirected": "Excludes directed usage",
     "yourTokens": "Tokens Provided",
     "addToken": "Add Token",
     "usage": "Usage Log",
+    "directedUsage": "Directed Usage Log",
+    "directedUsageTip": "Directed usage is not counted in total quota, credits, or rankings",
+    "directedSpent": "Used {count} tokens (directed)",
+    "directedLabel": "Directed",
+    "noDirectedLogs": "No directed usage yet.",
     "platformKey": "Your Platform Key",
     "platformUrl": "Platform API URL",
     "platformKeyTip": "Use this key as your Bearer token and the platform URL as the base URL.",
     "copy": "Copy",
+    "resetKey": "Reset",
+    "confirmResetKey": "Confirm reset?",
     "noLogs": "No usage logs yet.",
     "spent": "Spent {count} tokens",
     "noTokens": "You haven't provided any tokens yet.",
@@ -87,6 +95,6 @@
     "toolsSubtitle": "Quota management, multi-platform monitoring and more features are under development.",
     "announcement": "Announcements",
     "announcementTitle": "🎉 Welcome to Token Swap Hub",
-    "announcementContent": "This platform helps you share idle AI tokens among friends.\n\n🔑 Share Tokens → Earn credits\n💎 Spend credits → Use collective AI power\n🎯 Directed sharing → Friends use for free, no charges\n🏆 Leaderboard → See community rankings\n\nContact the admin if you need help. Enjoy!"
+    "announcementContent": "This platform helps you share idle AI tokens among friends.\n\n🔑 Share Tokens → Earn credits\n💎 Spend credits → Use collective AI power\n🎯 Directed sharing → Friends use for free, no credits or rankings impact\n🏆 Leaderboard → See community rankings (excludes directed)\n\nContact the admin if you need help. Enjoy!"
   }
 }
