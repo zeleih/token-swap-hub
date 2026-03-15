@@ -2,7 +2,30 @@ import 'server-only';
 import { SignJWT, jwtVerify, type JWTPayload } from 'jose';
 import { cookies } from 'next/headers';
 
-const key = new TextEncoder().encode(process.env.JWT_SECRET || 'secret-for-dev-only-update-in-prod');
+const globalForSession = globalThis as typeof globalThis & {
+  __tokenHubJwtSecret?: string;
+  __tokenHubJwtSecretWarningShown?: boolean;
+};
+
+function getSessionSecret() {
+  const configuredSecret = process.env.JWT_SECRET?.trim();
+  if (configuredSecret) {
+    return configuredSecret;
+  }
+
+  if (!globalForSession.__tokenHubJwtSecret) {
+    if (process.env.NODE_ENV === 'production' && !globalForSession.__tokenHubJwtSecretWarningShown) {
+      console.warn('JWT_SECRET is not configured. Falling back to an ephemeral secret; set JWT_SECRET before deployment.');
+      globalForSession.__tokenHubJwtSecretWarningShown = true;
+    }
+
+    globalForSession.__tokenHubJwtSecret = `dev-${crypto.randomUUID()}-${crypto.randomUUID()}`;
+  }
+
+  return globalForSession.__tokenHubJwtSecret;
+}
+
+const key = new TextEncoder().encode(getSessionSecret());
 
 type SessionPayload = JWTPayload & {
   userId: string;

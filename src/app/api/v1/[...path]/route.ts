@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { createParser } from "eventsource-parser";
 import { getProviderBaseUrl } from "@/lib/providers";
@@ -140,8 +139,8 @@ async function handleProxy(req: NextRequest, params: RouteParams) {
 
   // Simple random picking among available tokens
   const chosenToken = availableTokens[Math.floor(Math.random() * availableTokens.length)];
-  // 定向开放的 Token（有白名单）不赚取信用点数
-  const isDirected = !!chosenToken.allowedUsers;
+  // 只有“别人使用白名单来源”才算定向使用；来源拥有者本人使用自己的 token 仍走正常计费
+  const isDirected = Boolean(chosenToken.allowedUsers && chosenToken.userId !== consumer.id);
 
   // Reconstruct target URL based on chosen token's provider
   const targetUrl = new URL(req.url);
@@ -300,14 +299,24 @@ async function commitBilling(params: {
 
   const credits = creditResult?.credits ?? 0;
   const estimatedCostUsd = creditResult?.estimatedCostUsd ?? 0;
-  const consumerPointsDelta = params.isDirected ? 0 : -credits;
-  const providerPointsDelta = params.isDirected || params.isAdminSupply ? 0 : credits;
 
-  const operations: Prisma.PrismaPromise<unknown>[] = [
-    prisma.requestLog.create({
-        data: {
-          consumerId: params.consumerId,
-          tokenId: params.tokenId,
+  await prisma.$transaction(async (tx) => {
+    const consumerAccount = params.isDirected
+      ? null
+      : await tx.user.findUnique({
+          where: { id: params.consumerId },
+          select: { points: true },
+        });
+
+    const availablePoints = Math.max(0, consumerAccount?.points ?? 0);
+    const settledCredits = params.isDirected ? 0 : Math.min(credits, availablePoints);
+    const consumerPointsDelta = params.isDirected ? 0 : -settledCredits;
+    const providerPointsDelta = params.isDirected || params.isAdminSupply ? 0 : settledCredits;
+
+    await tx.requestLog.create({
+      data: {
+        consumerId: params.consumerId,
+        tokenId: params.tokenId,
         tokensUsed: params.usage.totalTokens,
         promptTokens: params.usage.promptTokens,
         completionTokens: params.usage.completionTokens,
@@ -322,42 +331,36 @@ async function commitBilling(params: {
         pricingRefreshedAt: creditResult?.pricing.fetchedAt,
         isDirected: params.isDirected,
         status: "SUCCESS",
-      }
-    })
-  ];
+      },
+    });
 
-  // 定向 Token：不计入总额度，不扣分，不加分
-  if (!params.isDirected) {
-    // 更新 token 使用量（仅非定向）
-    operations.push(
-      prisma.tokenKey.update({
-        where: { id: params.tokenId },
-        data: { totalUsedTokens: { increment: params.usage.totalTokens } }
-      })
-    );
-    operations.push(
-      prisma.tokenKey.update({
-        where: { id: params.tokenId },
-        data: { usedCredits: { increment: credits } }
-      })
-    );
-    // 扣消费者点数
-    operations.push(
-      prisma.user.update({
-        where: { id: params.consumerId },
-        data: { points: { increment: consumerPointsDelta } }
-      })
-    );
-    // 非管理员供应的，奖励提供者
-    if (!params.isAdminSupply) {
-      operations.push(
-        prisma.user.update({
-          where: { id: params.providerOwnerId },
-          data: { points: { increment: providerPointsDelta } }
-        })
-      );
+    // 定向 Token：不计入总额度，不扣分，不加分
+    if (params.isDirected) {
+      return;
     }
-  }
 
-  await prisma.$transaction(operations).catch((error) => console.error("Billing commit failed:", error));
+    await tx.tokenKey.update({
+      where: { id: params.tokenId },
+      data: { totalUsedTokens: { increment: params.usage.totalTokens } },
+    });
+
+    await tx.tokenKey.update({
+      where: { id: params.tokenId },
+      data: { usedCredits: { increment: credits } },
+    });
+
+    if (settledCredits > 0) {
+      await tx.user.update({
+        where: { id: params.consumerId },
+        data: { points: { decrement: settledCredits } },
+      });
+    }
+
+    if (!params.isAdminSupply && providerPointsDelta > 0) {
+      await tx.user.update({
+        where: { id: params.providerOwnerId },
+        data: { points: { increment: providerPointsDelta } },
+      });
+    }
+  }).catch((error) => console.error("Billing commit failed:", error));
 }

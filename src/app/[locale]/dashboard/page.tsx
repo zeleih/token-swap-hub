@@ -16,6 +16,7 @@ import { refreshPricingAction } from "@/actions/pricing";
 import { Link } from "@/i18n/routing";
 import { redirect } from "next/navigation";
 import { parseCustomModelsConfig } from "@/lib/custom-models";
+import { getProviderBaseUrl } from "@/lib/providers";
 import HelpHint from "./components/HelpHint";
 
 type UsageLogType = "usage" | "provided" | "directedUsage" | "directedProvided";
@@ -43,6 +44,7 @@ type DashboardLog = {
 
 type AccessibleToken = {
   id: string;
+  key: string;
   provider: string;
   isAdminSupply: boolean;
   usedCredits: number;
@@ -101,6 +103,52 @@ function formatPricePerM(value: number | null) {
     minimumFractionDigits: 0,
     maximumFractionDigits: 2,
   })}`;
+}
+
+async function fetchAccessibleOpenAiModels(tokens: AccessibleToken[]) {
+  const openAiTokens = Array.from(
+    new Map(
+      tokens
+        .filter((token) => token.provider === "openai")
+        .map((token) => [token.key, token]),
+    ).values(),
+  );
+
+  if (openAiTokens.length === 0) {
+    return [];
+  }
+
+  const modelResults = await Promise.allSettled(
+    openAiTokens.map(async (token) => {
+      const response = await fetch(`${getProviderBaseUrl("openai")}/models`, {
+        headers: {
+          Authorization: `Bearer ${token.key}`,
+        },
+        cache: "no-store",
+        signal: AbortSignal.timeout(3000),
+      });
+
+      if (!response.ok) {
+        return [];
+      }
+
+      const payload = (await response.json()) as {
+        data?: Array<{ id?: string }>;
+      };
+
+      return (payload.data || [])
+        .map((entry) => (typeof entry.id === "string" ? entry.id.trim() : ""))
+        .filter(Boolean);
+    }),
+  );
+
+  return Array.from(
+    new Set(
+      modelResults.flatMap((result) =>
+        result.status === "fulfilled" ? result.value : [],
+      ),
+    ),
+  ).sort((left, right) => left.localeCompare(right));
 }
 
 export default async function DashboardPage({ searchParams }: PageProps) {
@@ -179,20 +227,28 @@ export default async function DashboardPage({ searchParams }: PageProps) {
 
   const availableModelGroups: AvailableModelGroup[] = [];
   const hasOpenAiAccess = accessibleTokens.some((token) => token.provider === "openai");
+  const openAiModelIds = hasOpenAiAccess ? await fetchAccessibleOpenAiModels(accessibleTokens) : [];
 
-  if (hasOpenAiAccess) {
+  if (openAiModelIds.length > 0) {
     availableModelGroups.push({
       id: "openai",
       providerLabel: "OpenAI",
       helperText: null,
-      models: pricingSnapshots
-        .filter((snapshot) => snapshot.provider === "openai")
-        .map((snapshot) => ({
-          id: snapshot.model,
-          name: snapshot.displayName,
-          inputPricePerM: snapshot.inputPricePerM,
-          outputPricePerM: snapshot.outputPricePerM,
-        })),
+      models: openAiModelIds.map((modelId) => {
+        const normalizedModelId = modelId.toLowerCase();
+        const snapshot = pricingSnapshots.find(
+          (entry) =>
+            entry.provider === "openai" &&
+            (entry.model === normalizedModelId || normalizedModelId.startsWith(entry.model)),
+        );
+
+        return {
+          id: modelId,
+          name: snapshot?.displayName || modelId,
+          inputPricePerM: snapshot?.inputPricePerM ?? null,
+          outputPricePerM: snapshot?.outputPricePerM ?? null,
+        };
+      }),
     });
   }
 
