@@ -124,7 +124,7 @@
     "validating": "正在验证并添加...",
     "tokenAdded": "Token 已安全添加！",
     "creditLimit": "额度上限",
-    "creditLimitHelp": "给这份来源设置最多愿意承担多少信用点数成本。达到上限后，平台会自动停止继续分配它，避免超额消耗。",
+    "creditLimitHelp": "给这份来源设置最多愿意承担多少额度上限。这里虽然填写的是信用点数，但在数值上等同于美元金额，可以直接按 USD 金额理解。达到上限后，平台会自动停止继续分配它，避免超额消耗。",
     "creditLimitPlaceholder": "留空表示无限制，单位 pts",
     "allowedUsers": "定向开放用户",
     "allowedUsersPlaceholder": "用户名逗号分隔，留空=所有人",

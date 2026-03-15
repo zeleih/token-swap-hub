@@ -124,7 +124,7 @@
     "validating": "Validating & Adding...",
     "tokenAdded": "Token added securely!",
     "creditLimit": "Credit Cap",
-    "creditLimitHelp": "Set the maximum credit cost this source is allowed to bear. Once the cap is reached, Token Hub stops routing new traffic to it automatically.",
+    "creditLimitHelp": "Set the maximum cap for this source. Although the form asks for platform credits, the numeric value is effectively equal to USD, so you can think of it as a dollar amount. Once the cap is reached, Token Hub stops routing new traffic to it automatically.",
     "creditLimitPlaceholder": "Leave empty for unlimited, unit pts",
     "allowedUsers": "Allowed Users",
     "allowedUsersPlaceholder": "Comma-separated usernames, empty=everyone",
