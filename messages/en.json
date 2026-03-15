@@ -29,7 +29,6 @@
     "logout": "Logout",
     "points": "Credits",
     "pointsUnit": "pts",
-    "pointsExcludeDirected": "Excludes directed usage",
     "yourTokens": "Token Sources",
     "addToken": "Add Token Source",
     "usage": "Usage Log",

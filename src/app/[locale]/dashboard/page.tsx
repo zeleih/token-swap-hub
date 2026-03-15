@@ -161,10 +161,10 @@ export default async function DashboardPage({ searchParams }: PageProps) {
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 space-y-8 duration-500">
-      <div className="flex flex-wrap gap-2 rounded-2xl border border-zinc-200 bg-white p-2 shadow-sm dark:border-white/10 dark:bg-white/5">
+      <div className="grid grid-cols-2 gap-2 rounded-2xl border border-zinc-200 bg-white p-2 shadow-sm dark:border-white/10 dark:bg-white/5">
         <Link
           href={{ pathname: "/dashboard", query: { tab: "usage" } }}
-          className={`rounded-xl px-4 py-2 text-sm font-medium transition-colors ${
+          className={`rounded-xl px-4 py-2 text-center text-sm font-medium transition-colors ${
             activeTab === "usage"
               ? "bg-zinc-900 text-white dark:bg-white dark:text-zinc-900"
               : "text-zinc-600 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-white/10"
@@ -174,7 +174,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
         </Link>
         <Link
           href={{ pathname: "/dashboard", query: { tab: "contribution" } }}
-          className={`rounded-xl px-4 py-2 text-sm font-medium transition-colors ${
+          className={`rounded-xl px-4 py-2 text-center text-sm font-medium transition-colors ${
             activeTab === "contribution"
               ? "bg-zinc-900 text-white dark:bg-white dark:text-zinc-900"
               : "text-zinc-600 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-white/10"
@@ -200,7 +200,6 @@ export default async function DashboardPage({ searchParams }: PageProps) {
                   {t("pointsUnit")}
                 </span>
               </div>
-              <p className="mt-2 text-xs text-zinc-400">{t("pointsExcludeDirected")}</p>
             </div>
 
             <PlatformKeyCard
@@ -259,7 +258,25 @@ export default async function DashboardPage({ searchParams }: PageProps) {
           </div>
         </>
       ) : (
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+            <div className="relative overflow-hidden rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-white/5">
+              <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-blue-500/10 blur-2xl" />
+              <h3 className="mb-2 text-sm font-medium text-zinc-500 dark:text-zinc-400">
+                {t("points")}
+              </h3>
+              <div className="flex items-baseline gap-2">
+                <span className="text-4xl font-bold tracking-tight text-zinc-900 dark:text-white">
+                  {formatPoints(user.points)}
+                </span>
+                <span className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
+                  {t("pointsUnit")}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
           <div className="space-y-6 lg:col-span-2">
             <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-white/5">
               <h3 className="mb-6 text-xl font-semibold text-zinc-900 dark:text-white">
@@ -334,6 +351,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
               addModelText={t("addModel")}
               removeModelText={t("removeModel")}
             />
+          </div>
           </div>
         </div>
       )}
