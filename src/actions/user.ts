@@ -37,7 +37,7 @@ export async function resetPlatformKeyAction() {
     data: { platformKey: newKey }
   });
 
-  revalidatePath("/dashboard");
+  revalidatePath("/", "layout");
   return { success: true, newKey };
 }
 

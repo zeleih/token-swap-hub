@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { Check, Copy, RefreshCw } from "lucide-react";
 import { resetPlatformKeyAction } from "@/actions/user";
 
@@ -18,9 +18,9 @@ export default function PlatformKeyCard({
   label: string;
 }) {
   const [copied, setCopied] = useState(false);
-  const [confirming, setConfirming] = useState(false);
-  const [resetting, setResetting] = useState(false);
   const [currentKey, setCurrentKey] = useState(platformKey);
+  const [error, setError] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
 
   const handleCopy = () => {
     navigator.clipboard.writeText(currentKey);
@@ -28,19 +28,21 @@ export default function PlatformKeyCard({
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleReset = async () => {
-    if (!confirming) {
-      setConfirming(true);
-      setTimeout(() => setConfirming(false), 5000); // auto-cancel after 5s
+  const handleReset = () => {
+    if (!window.confirm(confirmResetText)) {
       return;
     }
-    setResetting(true);
-    const result = await resetPlatformKeyAction();
-    if (result.success && result.newKey) {
-      setCurrentKey(result.newKey);
-    }
-    setResetting(false);
-    setConfirming(false);
+
+    setError(null);
+    startTransition(async () => {
+      const result = await resetPlatformKeyAction();
+      if (result.success && result.newKey) {
+        setCurrentKey(result.newKey);
+        return;
+      }
+
+      setError(typeof result.error === "string" ? result.error : "Reset failed");
+    });
   };
 
   return (
@@ -49,23 +51,24 @@ export default function PlatformKeyCard({
       <div className="flex justify-between items-center">
         <h3 className="text-sm font-medium text-zinc-500 dark:text-zinc-400 mb-2">{label}</h3>
         <button
+          type="button"
           onClick={handleReset}
-          disabled={resetting}
-          className={`text-xs px-2 py-1 rounded-lg transition-all flex items-center gap-1 ${
-            confirming
-              ? "bg-red-500/10 text-red-500 hover:bg-red-500/20 font-medium"
-              : "text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-white/10"
-          }`}
+          disabled={isPending}
+          className="text-xs px-2 py-1 rounded-lg transition-all flex items-center gap-1 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-white/10 disabled:opacity-60"
         >
-          <RefreshCw className={`w-3 h-3 ${resetting ? "animate-spin" : ""}`} />
-          {confirming ? confirmResetText : resetText}
+          <RefreshCw className={`w-3 h-3 ${isPending ? "animate-spin" : ""}`} />
+          {resetText}
         </button>
       </div>
+      {error && (
+        <p className="mt-2 text-xs text-red-500">{error}</p>
+      )}
       <div className="flex items-center gap-2 mt-4 bg-black/5 dark:bg-black/40 p-1.5 rounded-xl border border-zinc-200 dark:border-white/10">
         <code className="text-sm font-mono flex-1 px-3 text-zinc-800 dark:text-zinc-200 truncate">
           {currentKey}
         </code>
         <button
+          type="button"
           onClick={handleCopy}
           className="flex items-center justify-center p-2 rounded-lg bg-white dark:bg-white/10 hover:bg-zinc-100 dark:hover:bg-white/20 transition-all text-zinc-700 dark:text-zinc-300 shadow-sm"
           title={copyText}

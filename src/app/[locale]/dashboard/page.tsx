@@ -153,26 +153,28 @@ export default async function DashboardPage() {
           {/* Token Source List */}
           <div className="bg-white dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-2xl p-6 shadow-sm">
             <h3 className="text-xl font-semibold text-zinc-900 dark:text-white mb-6">{t("yourTokens")}</h3>
-            <TokenList
-              tokens={user.providedTokens}
-              noTokensText={t("noTokens")}
-              contributedText={t("contributed")}
-              revokeText={t("revoke")}
-              confirmRevokeText={t("confirmRevoke")}
-              pauseText={t("pauseToken")}
-              resumeText={t("resumeToken")}
-              usageLimitText={t("usageLimit")}
-              unlimitedText={t("unlimitedText")}
-              directedBadge={t("directedLabel")}
-              tokensUnit={t("tokensUnit")}
-              providerFilterLabel={t("providerFilter")}
-              statusFilterLabel={t("statusFilter")}
-              allProvidersText={t("allProviders")}
-              allStatusesText={t("allStatuses")}
-              prevPageText={t("prevPage")}
-              nextPageText={t("nextPage")}
-              pageLabelText={t("pageLabel")}
-            />
+            <div className="min-h-[20rem] max-h-[34rem] resize-y overflow-y-auto pr-2">
+              <TokenList
+                tokens={user.providedTokens}
+                noTokensText={t("noTokens")}
+                contributedText={t("contributed")}
+                revokeText={t("revoke")}
+                confirmRevokeText={t("confirmRevoke")}
+                pauseText={t("pauseToken")}
+                resumeText={t("resumeToken")}
+                usageLimitText={t("usageLimit")}
+                unlimitedText={t("unlimitedText")}
+                directedBadge={t("directedLabel")}
+                tokensUnit={t("tokensUnit")}
+                providerFilterLabel={t("providerFilter")}
+                statusFilterLabel={t("statusFilter")}
+                allProvidersText={t("allProviders")}
+                allStatusesText={t("allStatuses")}
+                prevPageText={t("prevPage")}
+                nextPageText={t("nextPage")}
+                pageLabelText={t("pageLabel")}
+              />
+            </div>
           </div>
 
           {/* Usage Log (merged: normal + directed with different colors) */}

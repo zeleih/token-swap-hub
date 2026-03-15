@@ -72,7 +72,7 @@ export default function TokenList({
   const paginatedTokens = filteredTokens.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
   const handleDelete = (id: string) => {
-    if (confirm(confirmRevokeText)) {
+    if (window.confirm(confirmRevokeText)) {
       startTransition(async () => {
         await deleteTokenAction(id);
       });
@@ -203,6 +203,7 @@ export default function TokenList({
 
                   <div className="flex items-center justify-between gap-2 border-t border-zinc-200 pt-3 dark:border-white/5">
                     <button
+                      type="button"
                       disabled={isPending || (!isActive && !isPaused)}
                       onClick={() => handleToggle(token.id)}
                       className={`rounded-lg px-2 py-1 text-xs font-medium transition-colors disabled:opacity-50 ${
@@ -214,6 +215,7 @@ export default function TokenList({
                       {isActive ? pauseText : resumeText}
                     </button>
                     <button
+                      type="button"
                       disabled={isPending}
                       onClick={() => handleDelete(token.id)}
                       className="text-xs font-medium text-red-500 transition-colors hover:text-red-600 disabled:opacity-50"
