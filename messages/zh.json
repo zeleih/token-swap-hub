@@ -1,6 +1,6 @@
 {
   "Index": {
-    "title": "Token 抽水蓄能与共享",
+    "title": "Token 共享平台",
     "subtitle": "共享闲置的 Token 赚取点数，或者消耗点数使用大家共享的 AI 能力。",
     "login": "登录",
     "register": "使用邀请码注册"
@@ -86,7 +86,7 @@
     "toolsTitle": "个人工具箱",
     "toolsSubtitle": "额度管理、多平台监控等功能正在开发中。",
     "announcement": "公告",
-    "announcementTitle": "🎉 欢迎使用 Token 抽水蓄能与共享平台",
+    "announcementTitle": "🎉 欢迎使用 Token 共享平台",
     "announcementContent": "本平台帮助您在朋友之间共享闲置的 AI Token。\n\n🔑 分享您的 Token → 赚取信用点数\n💎 消耗信用点数 → 使用共享池的 AI 能力\n🎯 定向开放 → 指定好友免费使用，双方不计费\n🏆 排行榜 → 查看社区贡献与消费排名\n\n如有问题请联系管理员。祝使用愉快！"
   }
 }

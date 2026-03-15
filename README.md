@@ -1,4 +1,4 @@
-# Token 抽水蓄能与共享平台 | Token Swap Hub
+# Token 共享平台 | Token Swap Hub
 
 <p align="center">
   <strong>共享闲置 Token，赚取信用点数，消耗点数使用 AI 能力</strong>
