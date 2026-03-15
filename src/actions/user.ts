@@ -52,7 +52,7 @@ export async function transferPointsAction(prevState: any, formData: FormData) {
 
   if (!toUsername || !amountStr) return { error: "请填写所有字段" };
 
-  const amount = parseInt(amountStr);
+  const amount = parseFloat(amountStr);
   if (isNaN(amount) || amount <= 0) return { error: "赠送数量必须大于 0" };
 
   // 二次确认：需手动输入 CONFIRM

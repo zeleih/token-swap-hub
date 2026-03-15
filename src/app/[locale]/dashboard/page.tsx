@@ -6,18 +6,32 @@ import AddTokenForm from "./components/AddTokenForm";
 import TokenList from "./components/TokenList";
 import UsageLogPanel from "./components/UsageLogPanel";
 import { getLocale, getTranslations } from "next-intl/server";
+import { ensurePricingFresh, formatPoints, formatUsd, getLatestPricingRefreshAt } from "@/lib/pricing";
+import { refreshPricingAction } from "@/actions/pricing";
 
 type UsageLogType = "usage" | "provided" | "directedUsage" | "directedProvided";
 type DashboardLog = {
   id: string;
   consumerId: string;
+  provider: string | null;
+  model: string | null;
+  promptTokens: number;
+  completionTokens: number;
   tokensUsed: number;
+  inputPricePerM: number | null;
+  outputPricePerM: number | null;
+  estimatedCostUsd: number | null;
+  consumerPointsDelta: number;
+  providerPointsDelta: number;
   isDirected: boolean;
   status: string;
   createdAt: Date;
   consumer: {
     username: string;
     displayName: string | null;
+  };
+  token: {
+    provider: string;
   };
 };
 
@@ -26,13 +40,17 @@ export default async function DashboardPage() {
   const userId = session!.userId;
   const t = await getTranslations("Dashboard");
   const locale = await getLocale();
+  await ensurePricingFresh();
 
   const platformUrl = process.env.PLATFORM_URL || "http://localhost:3000/api/v1";
+  const latestPricingRefreshAt = await getLatestPricingRefreshAt();
 
   const user = await prisma.user.findUnique({
     where: { id: userId },
     include: {
-      providedTokens: true,
+      providedTokens: {
+        orderBy: { createdAt: "desc" },
+      },
     }
   });
 
@@ -52,6 +70,11 @@ export default async function DashboardPage() {
           username: true,
           displayName: true,
         }
+      },
+      token: {
+        select: {
+          provider: true,
+        }
       }
     },
     take: 80,
@@ -63,19 +86,20 @@ export default async function DashboardPage() {
       req.consumerId === userId
         ? (req.isDirected ? "directedUsage" : "usage")
         : (req.isDirected ? "directedProvided" : "provided");
+    const visiblePointDelta = req.consumerId === userId ? req.consumerPointsDelta : req.providerPointsDelta;
 
     return {
       id: req.id,
       type,
+      provider: req.provider || req.token.provider,
+      model: req.model || t("unknownModel"),
+      inputTokens: req.promptTokens.toLocaleString(),
+      outputTokens: req.completionTokens.toLocaleString(),
+      totalTokens: req.tokensUsed.toLocaleString(),
+      unitPrice: `$${(req.inputPricePerM ?? 0).toFixed(2)} / $${(req.outputPricePerM ?? 0).toFixed(2)} / 1M`,
+      costUsd: formatUsd(req.estimatedCostUsd),
+      creditDelta: `${visiblePointDelta > 0 ? "+" : ""}${formatPoints(visiblePointDelta)}`,
       status: req.status,
-      description:
-        type === "usage"
-          ? t("logUsage", { count: req.tokensUsed })
-          : type === "provided"
-            ? t("logProvided", { count: req.tokensUsed, username: req.consumer?.displayName || req.consumer?.username || t("someone") })
-            : type === "directedUsage"
-              ? t("logDirectedUsage", { count: req.tokensUsed })
-              : t("logDirectedProvided", { count: req.tokensUsed, username: req.consumer?.displayName || req.consumer?.username || t("someone") }),
       createdAtLabel: new Intl.DateTimeFormat(locale, {
         month: "2-digit",
         day: "2-digit",
@@ -94,10 +118,10 @@ export default async function DashboardPage() {
         {/* Credits Card */}
         <div className="relative overflow-hidden p-6 rounded-2xl bg-white dark:bg-white/5 border border-zinc-200 dark:border-white/10 shadow-sm">
           <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-2xl -mr-10 -mt-10"></div>
-          <h3 className="text-sm font-medium text-zinc-500 dark:text-zinc-400 mb-2">{t("points")}</h3>
+            <h3 className="text-sm font-medium text-zinc-500 dark:text-zinc-400 mb-2">{t("points")}</h3>
           <div className="flex items-baseline gap-2">
             <span className="text-4xl font-bold tracking-tight text-zinc-900 dark:text-white">
-              {user.points.toLocaleString()}
+              {formatPoints(user.points)}
             </span>
             <span className="text-sm font-medium text-zinc-500 dark:text-zinc-400">{t("pointsUnit")}</span>
           </div>
@@ -140,12 +164,44 @@ export default async function DashboardPage() {
               usageLimitText={t("usageLimit")}
               unlimitedText={t("unlimitedText")}
               directedBadge={t("directedLabel")}
+              tokensUnit={t("tokensUnit")}
+              providerFilterLabel={t("providerFilter")}
+              statusFilterLabel={t("statusFilter")}
+              allProvidersText={t("allProviders")}
+              allStatusesText={t("allStatuses")}
+              prevPageText={t("prevPage")}
+              nextPageText={t("nextPage")}
+              pageLabelText={t("pageLabel")}
             />
           </div>
 
           {/* Usage Log (merged: normal + directed with different colors) */}
           <div className="bg-white dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-2xl p-6 shadow-sm">
-            <h3 className="text-xl font-semibold text-zinc-900 dark:text-white mb-6">{t("usage")}</h3>
+            <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h3 className="text-xl font-semibold text-zinc-900 dark:text-white">{t("usage")}</h3>
+                <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+                  {t("pricingUpdatedAt", {
+                    time: latestPricingRefreshAt
+                      ? new Intl.DateTimeFormat(locale, {
+                          month: "2-digit",
+                          day: "2-digit",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        }).format(latestPricingRefreshAt)
+                      : t("pricingUnknown")
+                  })}
+                </p>
+              </div>
+              <form action={refreshPricingAction}>
+                <button
+                  type="submit"
+                  className="rounded-xl border border-zinc-200 px-3 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-100 dark:border-white/10 dark:text-zinc-200 dark:hover:bg-white/10"
+                >
+                  {t("refreshPricing")}
+                </button>
+              </form>
+            </div>
             <UsageLogPanel
               logs={mergedLogs}
               texts={{
@@ -159,6 +215,17 @@ export default async function DashboardPage() {
                 prevPage: t("prevPage"),
                 nextPage: t("nextPage"),
                 pageLabel: t("pageLabel"),
+                providerFilterLabel: t("providerFilter"),
+                allProvidersText: t("allProviders"),
+                timeHeader: t("timeHeader"),
+                typeHeader: t("typeHeader"),
+                providerHeader: t("providerHeader"),
+                modelHeader: t("modelHeader"),
+                tokensHeader: t("tokensHeader"),
+                priceHeader: t("priceHeader"),
+                costHeader: t("costHeader"),
+                pointsHeader: t("pointsChangeHeader"),
+                statusHeader: t("statusHeader"),
               }}
             />
           </div>

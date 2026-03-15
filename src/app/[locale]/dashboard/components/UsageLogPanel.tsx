@@ -8,7 +8,14 @@ type UsageLogFilter = "all" | UsageLogType;
 type UsageLogItem = {
   id: string;
   type: UsageLogType;
-  description: string;
+  provider: string;
+  model: string;
+  inputTokens: string;
+  outputTokens: string;
+  totalTokens: string;
+  unitPrice: string;
+  costUsd: string;
+  creditDelta: string;
   status: string;
   createdAtLabel: string;
 };
@@ -24,27 +31,26 @@ type UsageLogTexts = {
   prevPage: string;
   nextPage: string;
   pageLabel: string;
+  providerFilterLabel: string;
+  allProvidersText: string;
+  timeHeader: string;
+  typeHeader: string;
+  providerHeader: string;
+  modelHeader: string;
+  tokensHeader: string;
+  priceHeader: string;
+  costHeader: string;
+  pointsHeader: string;
+  statusHeader: string;
 };
 
-const PAGE_SIZE = 6;
+const PAGE_SIZE = 10;
 
-const badgeStyles: Record<UsageLogType, { badgeClass: string; dotClass: string }> = {
-  usage: {
-    badgeClass: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20",
-    dotClass: "bg-emerald-500",
-  },
-  provided: {
-    badgeClass: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20",
-    dotClass: "bg-amber-500",
-  },
-  directedUsage: {
-    badgeClass: "bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20",
-    dotClass: "bg-sky-500",
-  },
-  directedProvided: {
-    badgeClass: "bg-fuchsia-500/10 text-fuchsia-600 dark:text-fuchsia-400 border border-fuchsia-500/20",
-    dotClass: "bg-fuchsia-500",
-  },
+const badgeStyles: Record<UsageLogType, string> = {
+  usage: "border border-emerald-500/20 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+  provided: "border border-amber-500/20 bg-amber-500/10 text-amber-600 dark:text-amber-400",
+  directedUsage: "border border-sky-500/20 bg-sky-500/10 text-sky-600 dark:text-sky-400",
+  directedProvided: "border border-fuchsia-500/20 bg-fuchsia-500/10 text-fuchsia-600 dark:text-fuchsia-400",
 };
 
 export default function UsageLogPanel({
@@ -55,19 +61,24 @@ export default function UsageLogPanel({
   texts: UsageLogTexts;
 }) {
   const [activeFilter, setActiveFilter] = useState<UsageLogFilter>("all");
+  const [providerFilter, setProviderFilter] = useState("all");
   const [page, setPage] = useState(1);
 
-  const filterOptions: Array<{ value: UsageLogFilter; label: string; type?: UsageLogType }> = [
+  const filterOptions: Array<{ value: UsageLogFilter; label: string }> = [
     { value: "all", label: texts.all },
-    { value: "usage", label: texts.usage, type: "usage" },
-    { value: "provided", label: texts.provided, type: "provided" },
-    { value: "directedUsage", label: texts.directedUsage, type: "directedUsage" },
-    { value: "directedProvided", label: texts.directedProvided, type: "directedProvided" },
+    { value: "usage", label: texts.usage },
+    { value: "provided", label: texts.provided },
+    { value: "directedUsage", label: texts.directedUsage },
+    { value: "directedProvided", label: texts.directedProvided },
   ];
 
-  const filteredLogs = activeFilter === "all"
-    ? logs
-    : logs.filter((log) => log.type === activeFilter);
+  const providers = Array.from(new Set(logs.map((log) => log.provider))).sort();
+
+  const filteredLogs = logs.filter((log) => {
+    const typeMatched = activeFilter === "all" || log.type === activeFilter;
+    const providerMatched = providerFilter === "all" || log.provider === providerFilter;
+    return typeMatched && providerMatched;
+  });
 
   const totalPages = Math.max(1, Math.ceil(filteredLogs.length / PAGE_SIZE));
   const currentPage = Math.min(page, totalPages);
@@ -79,36 +90,55 @@ export default function UsageLogPanel({
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap gap-2">
-        {filterOptions.map((option) => {
-          const count = option.value === "all"
-            ? logs.length
-            : logs.filter((log) => log.type === option.value).length;
-          const isActive = activeFilter === option.value;
-          const style = option.type ? badgeStyles[option.type] : null;
+      <div className="flex flex-wrap items-end gap-3">
+        <div className="flex flex-wrap gap-2">
+          {filterOptions.map((option) => {
+            const count = option.value === "all"
+              ? logs.length
+              : logs.filter((log) => log.type === option.value).length;
+            const isActive = activeFilter === option.value;
 
-          return (
-            <button
-              key={option.value}
-              type="button"
-              onClick={() => {
-                setActiveFilter(option.value);
-                setPage(1);
-              }}
-              className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
-                isActive
-                  ? style
-                    ? style.badgeClass
-                    : "border border-zinc-400/30 bg-zinc-900 text-white dark:bg-white dark:text-zinc-900"
-                  : "border border-zinc-200 bg-zinc-50 text-zinc-600 hover:bg-zinc-100 dark:border-white/10 dark:bg-white/5 dark:text-zinc-300 dark:hover:bg-white/10"
-              }`}
-            >
-              {style && <span className={`h-2 w-2 rounded-full ${style.dotClass}`}></span>}
-              <span>{option.label}</span>
-              <span className="rounded-full bg-black/5 px-1.5 py-0.5 text-[11px] dark:bg-white/10">{count}</span>
-            </button>
-          );
-        })}
+            return (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => {
+                  setActiveFilter(option.value);
+                  setPage(1);
+                }}
+                className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
+                  isActive
+                    ? option.value === "all"
+                      ? "border border-zinc-400/30 bg-zinc-900 text-white dark:bg-white dark:text-zinc-900"
+                      : badgeStyles[option.value]
+                    : "border border-zinc-200 bg-zinc-50 text-zinc-600 hover:bg-zinc-100 dark:border-white/10 dark:bg-white/5 dark:text-zinc-300 dark:hover:bg-white/10"
+                }`}
+              >
+                <span>{option.label}</span>
+                <span className="rounded-full bg-black/5 px-1.5 py-0.5 text-[11px] dark:bg-white/10">{count}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        <label className="ml-auto flex min-w-[180px] flex-col gap-2 text-sm text-zinc-500 dark:text-zinc-400">
+          <span>{texts.providerFilterLabel}</span>
+          <select
+            value={providerFilter}
+            onChange={(event) => {
+              setProviderFilter(event.target.value);
+              setPage(1);
+            }}
+            className="rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 text-zinc-900 outline-none dark:border-white/10 dark:bg-black/30 dark:text-white"
+          >
+            <option value="all">{texts.allProvidersText}</option>
+            {providers.map((provider) => (
+              <option key={provider} value={provider}>
+                {provider}
+              </option>
+            ))}
+          </select>
+        </label>
       </div>
 
       {filteredLogs.length === 0 ? (
@@ -117,35 +147,92 @@ export default function UsageLogPanel({
         </p>
       ) : (
         <>
-          <ul className="divide-y divide-zinc-200 dark:divide-white/10">
-            {paginatedLogs.map((log) => {
-              const style = badgeStyles[log.type];
+          <div className="overflow-hidden rounded-2xl border border-zinc-200 dark:border-white/10">
+            <div className="hidden grid-cols-[110px_110px_100px_1.3fr_1.1fr_1.3fr_100px_110px_90px] gap-3 border-b border-zinc-200 bg-zinc-50 px-4 py-3 text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:border-white/10 dark:bg-white/5 dark:text-zinc-400 md:grid">
+              <span>{texts.timeHeader}</span>
+              <span>{texts.typeHeader}</span>
+              <span>{texts.providerHeader}</span>
+              <span>{texts.modelHeader}</span>
+              <span>{texts.tokensHeader}</span>
+              <span>{texts.priceHeader}</span>
+              <span>{texts.costHeader}</span>
+              <span>{texts.pointsHeader}</span>
+              <span>{texts.statusHeader}</span>
+            </div>
 
-              return (
-                <li key={log.id} className="flex items-center justify-between gap-3 py-3 text-sm">
-                  <div className="min-w-0 pr-4">
-                    <div className="flex items-center gap-2">
-                      <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${style.dotClass}`}></span>
-                      <span className="text-zinc-700 dark:text-zinc-200">{log.description}</span>
+            <ul className="divide-y divide-zinc-200 dark:divide-white/10">
+              {paginatedLogs.map((log) => (
+                <li key={log.id} className="px-4 py-3">
+                  <div className="grid gap-3 md:grid-cols-[110px_110px_100px_1.3fr_1.1fr_1.3fr_100px_110px_90px] md:items-center">
+                    <div>
+                      <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400 md:hidden">{texts.timeHeader}</p>
+                      <p className="text-sm text-zinc-700 dark:text-zinc-200">{log.createdAtLabel}</p>
                     </div>
-                    <p className="mt-1 pl-[18px] text-xs text-zinc-500 dark:text-zinc-400">{log.createdAtLabel}</p>
-                  </div>
-                  <div className="flex shrink-0 items-center gap-2">
-                    <span className={`rounded px-2 py-1 text-xs font-medium ${style.badgeClass}`}>
-                      {filterOptions.find((option) => option.value === log.type)?.label}
-                    </span>
-                    <span className={`rounded px-2 py-1 text-xs font-medium ${
-                      log.status === "SUCCESS"
-                        ? "bg-emerald-500/10 text-emerald-500"
-                        : "bg-red-500/10 text-red-500"
-                    }`}>
-                      {log.status}
-                    </span>
+
+                    <div>
+                      <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400 md:hidden">{texts.typeHeader}</p>
+                      <span className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${badgeStyles[log.type]}`}>
+                        {filterOptions.find((option) => option.value === log.type)?.label}
+                      </span>
+                    </div>
+
+                    <div>
+                      <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400 md:hidden">{texts.providerHeader}</p>
+                      <span className="inline-flex rounded bg-blue-500/10 px-2 py-1 text-xs font-semibold uppercase tracking-wide text-blue-600 dark:text-blue-400">
+                        {log.provider}
+                      </span>
+                    </div>
+
+                    <div>
+                      <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400 md:hidden">{texts.modelHeader}</p>
+                      <p className="truncate text-sm text-zinc-700 dark:text-zinc-200">{log.model}</p>
+                    </div>
+
+                    <div>
+                      <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400 md:hidden">{texts.tokensHeader}</p>
+                      <p className="text-sm text-zinc-700 dark:text-zinc-200">
+                        I {log.inputTokens} / O {log.outputTokens} / T {log.totalTokens}
+                      </p>
+                    </div>
+
+                    <div>
+                      <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400 md:hidden">{texts.priceHeader}</p>
+                      <p className="text-sm text-zinc-700 dark:text-zinc-200">{log.unitPrice}</p>
+                    </div>
+
+                    <div>
+                      <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400 md:hidden">{texts.costHeader}</p>
+                      <p className="text-sm text-zinc-700 dark:text-zinc-200">{log.costUsd}</p>
+                    </div>
+
+                    <div>
+                      <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400 md:hidden">{texts.pointsHeader}</p>
+                      <p className={`text-sm font-medium ${
+                        log.creditDelta.startsWith("-")
+                          ? "text-red-500"
+                          : log.creditDelta.startsWith("+")
+                            ? "text-emerald-500"
+                            : "text-zinc-500 dark:text-zinc-400"
+                      }`}>
+                        {log.creditDelta}
+                      </p>
+                    </div>
+
+                    <div>
+                      <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400 md:hidden">{texts.statusHeader}</p>
+                      <span className={`inline-flex rounded px-2 py-1 text-xs font-medium ${
+                        log.status === "SUCCESS"
+                          ? "bg-emerald-500/10 text-emerald-500"
+                          : "bg-red-500/10 text-red-500"
+                      }`}>
+                        {log.status}
+                      </span>
+                    </div>
                   </div>
                 </li>
-              );
-            })}
-          </ul>
+              ))}
+            </ul>
+          </div>
 
           <div className="flex items-center justify-between gap-3 border-t border-zinc-200 pt-4 dark:border-white/10">
             <button

@@ -14,7 +14,7 @@ model User {
   passwordHash      String
   role              String    @default("USER") // USER, ADMIN
   platformKey       String    @unique // 分配给消费者的独立的平台消费 Key
-  points            Int       @default(0) // 信用点数
+  points            Float     @default(0) // 信用点数
   showOnLeaderboard Boolean   @default(true) // 是否展示在排行榜
   inviteCodeId      String?
   createdAt         DateTime  @default(now())
@@ -62,6 +62,17 @@ model RequestLog {
   consumerId      String
   tokenId         String
   tokensUsed      Int
+  promptTokens    Int      @default(0)
+  completionTokens Int     @default(0)
+  provider        String?
+  model           String?
+  inputPricePerM  Float?
+  outputPricePerM Float?
+  estimatedCostUsd Float?
+  consumerPointsDelta Float @default(0)
+  providerPointsDelta Float @default(0)
+  pricingSourceUrl String?
+  pricingRefreshedAt DateTime?
   isDirected      Boolean  @default(false) // 是否定向开放的使用
   status          String   @default("SUCCESS") // 调用状态：SUCCESS, FAILED
   createdAt       DateTime @default(now())
@@ -74,9 +85,27 @@ model PointTransfer {
   id          String   @id @default(cuid())
   fromUserId  String
   toUserId    String
-  amount      Int
+  amount      Float
   createdAt   DateTime @default(now())
 
   fromUser    User     @relation("PointsSent", fields: [fromUserId], references: [id])
   toUser      User     @relation("PointsReceived", fields: [toUserId], references: [id])
+}
+
+model ModelPriceSnapshot {
+  id             String   @id @default(cuid())
+  provider       String
+  model          String
+  displayName    String
+  inputPricePerM Float
+  outputPricePerM Float
+  currency       String   @default("USD")
+  sourceUrl      String
+  fetchedAt      DateTime @default(now())
+  isFallback     Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([provider, model])
+  @@index([provider])
 }

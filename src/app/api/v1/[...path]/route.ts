@@ -1,9 +1,34 @@
 import { NextRequest, NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { createParser } from "eventsource-parser";
 import { getProviderBaseUrl } from "@/lib/providers";
+import { calculateCreditsForUsage, extractUsage } from "@/lib/pricing";
 
 export const runtime = "nodejs";
+
+type RouteParams = { path: string[] };
+
+type TokenWithUser = {
+  id: string;
+  key: string;
+  provider: string;
+  status: string;
+  isAdminSupply: boolean;
+  totalUsedTokens: number;
+  usageLimit: number | null;
+  allowedUsers: string | null;
+  userId: string;
+  user: {
+    username: string;
+  };
+};
+
+type ParsedRequestBody = {
+  model: string | null;
+  isStream: boolean;
+  serializedBody?: string;
+};
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
   return handleProxy(req, await params);
@@ -13,7 +38,40 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ path
   return handleProxy(req, await params);
 }
 
-async function handleProxy(req: NextRequest, params: { path: string[] }) {
+async function parseRequestBody(req: NextRequest, pathString: string) {
+  const parsed: ParsedRequestBody = {
+    model: null,
+    isStream: false,
+  };
+
+  if (req.method === "GET" || req.method === "HEAD") {
+    return parsed;
+  }
+
+  const contentType = req.headers.get("content-type") || "";
+  if (!contentType.includes("application/json")) {
+    parsed.serializedBody = await req.text();
+    return parsed;
+  }
+
+  try {
+    const body = await req.json() as Record<string, unknown>;
+    parsed.model = typeof body.model === "string" ? body.model : null;
+
+    if (pathString === "chat/completions" && body.stream === true) {
+      parsed.isStream = true;
+      body.stream_options = { include_usage: true };
+    }
+
+    parsed.serializedBody = JSON.stringify(body);
+    return parsed;
+  } catch {
+    parsed.serializedBody = await req.text();
+    return parsed;
+  }
+}
+
+async function handleProxy(req: NextRequest, params: RouteParams) {
   const authHeader = req.headers.get("authorization");
   if (!authHeader || !authHeader.startsWith("Bearer tk_")) {
     return NextResponse.json({ error: "Unauthorized. Missing or invalid Platform Key." }, { status: 401 });
@@ -40,8 +98,8 @@ async function handleProxy(req: NextRequest, params: { path: string[] }) {
     include: { user: { select: { username: true } } }
   });
 
-  const consumer_username = (consumer as any).username;
-  const availableTokens = allActiveTokens.filter((token: any) => {
+  const consumerUsername = consumer.username;
+  const availableTokens = (allActiveTokens as TokenWithUser[]).filter((token) => {
     // Check usage limit
     if (token.usageLimit !== null && token.totalUsedTokens >= token.usageLimit) return false;
 
@@ -53,8 +111,8 @@ async function handleProxy(req: NextRequest, params: { path: string[] }) {
 
     // Rule 3: Tokens directed to this consumer (allowor whitelist)
     if (token.allowedUsers) {
-      const allowed = token.allowedUsers.split(",").map((u: string) => u.trim().toLowerCase());
-      if (allowed.includes(consumer_username.toLowerCase())) return true;
+      const allowed = token.allowedUsers.split(",").map((user) => user.trim().toLowerCase());
+      if (allowed.includes(consumerUsername.toLowerCase())) return true;
     }
 
     // Otherwise: not available (don't use other people's tokens)
@@ -75,6 +133,7 @@ async function handleProxy(req: NextRequest, params: { path: string[] }) {
   const pathString = params.path.join("/");
   const providerBaseUrl = getProviderBaseUrl(chosenToken.provider);
   const proxyTarget = `${providerBaseUrl}/${pathString}${targetUrl.search}`;
+  const parsedBody = await parseRequestBody(req, pathString);
 
   const fetchOptions: RequestInit = {
     method: req.method,
@@ -84,24 +143,8 @@ async function handleProxy(req: NextRequest, params: { path: string[] }) {
     },
   };
 
-  let isStream = false;
-
-  // Intercept body for chat completions to force stream_options for token usage
-  if (req.method === "POST" && pathString === "chat/completions") {
-    try {
-      const body = await req.json();
-      if (body.stream === true) {
-        isStream = true;
-        // Force the upstream to return usage at the end of the stream
-        body.stream_options = { include_usage: true };
-      }
-      fetchOptions.body = JSON.stringify(body);
-    } catch (e) {
-      // Body might be empty or not JSON, fallback to blob
-      fetchOptions.body = await req.text();
-    }
-  } else if (req.method !== "GET" && req.method !== "HEAD") {
-    fetchOptions.body = await req.text();
+  if (parsedBody.serializedBody !== undefined) {
+    fetchOptions.body = parsedBody.serializedBody;
   }
 
   const upstreamRes = await fetch(proxyTarget, fetchOptions);
@@ -122,21 +165,22 @@ async function handleProxy(req: NextRequest, params: { path: string[] }) {
   }
 
   // Handle billing logic post-response
-  let finalTokensUsed = 0;
+  let finalUsage = { promptTokens: 0, completionTokens: 0, totalTokens: 0 };
 
   // If streaming
-  if (isStream && upstreamRes.body) {
+  if (parsedBody.isStream && upstreamRes.body) {
     let parser: ReturnType<typeof createParser>;
     const transformStream = new TransformStream({
-      start(controller) {
-        parser = createParser({ onEvent: (event: any) => {
-          if (event.type === "event" && event.data !== "[DONE]") {
+      start() {
+        parser = createParser({ onEvent: (event) => {
+          if (event.data !== "[DONE]") {
             try {
               const data = JSON.parse(event.data);
-              if (data.usage && data.usage.total_tokens) {
-                 finalTokensUsed = data.usage.total_tokens;
+              const usage = extractUsage(data);
+              if (usage.totalTokens > 0) {
+                finalUsage = usage;
               }
-            } catch (e) {}
+            } catch {}
           }
         } });
       },
@@ -145,9 +189,18 @@ async function handleProxy(req: NextRequest, params: { path: string[] }) {
         parser.feed(decoded);
         controller.enqueue(chunk);
       },
-      flush(controller) {
+      async flush() {
         // Record billing when stream ends
-        commitBilling(consumer.id, chosenToken.id, chosenToken.userId, finalTokensUsed, chosenToken.isAdminSupply, isDirected);
+        await commitBilling({
+          consumerId: consumer.id,
+          tokenId: chosenToken.id,
+          providerOwnerId: chosenToken.userId,
+          provider: chosenToken.provider,
+          model: parsedBody.model,
+          usage: finalUsage,
+          isAdminSupply: chosenToken.isAdminSupply,
+          isDirected,
+        });
       }
     });
 
@@ -160,13 +213,20 @@ async function handleProxy(req: NextRequest, params: { path: string[] }) {
     const bodyStr = await upstreamRes.text();
     try {
       const data = JSON.parse(bodyStr);
-      if (data.usage && data.usage.total_tokens) {
-        finalTokensUsed = data.usage.total_tokens;
-      }
-    } catch (e) {}
+      finalUsage = extractUsage(data);
+    } catch {}
 
     // Record billing directly
-    commitBilling(consumer.id, chosenToken.id, chosenToken.userId, finalTokensUsed, chosenToken.isAdminSupply, isDirected);
+    await commitBilling({
+      consumerId: consumer.id,
+      tokenId: chosenToken.id,
+      providerOwnerId: chosenToken.userId,
+      provider: chosenToken.provider,
+      model: parsedBody.model,
+      usage: finalUsage,
+      isAdminSupply: chosenToken.isAdminSupply,
+      isDirected,
+    });
 
     return new NextResponse(bodyStr, {
       status: upstreamRes.status,
@@ -175,42 +235,84 @@ async function handleProxy(req: NextRequest, params: { path: string[] }) {
   }
 }
 
-async function commitBilling(consumerId: string, tokenId: string, providerId: string, tokensUsed: number, isAdminSupply: boolean, isDirected: boolean) {
-  if (tokensUsed <= 0) return;
+async function commitBilling(params: {
+  consumerId: string;
+  tokenId: string;
+  providerOwnerId: string;
+  provider: string;
+  model: string | null;
+  usage: {
+    promptTokens: number;
+    completionTokens: number;
+    totalTokens: number;
+  };
+  isAdminSupply: boolean;
+  isDirected: boolean;
+}) {
+  if (params.usage.totalTokens <= 0) return;
 
-  const ops: any[] = [
-    // 记录请求日志（始终记录，标记是否定向）
+  const creditResult = await calculateCreditsForUsage({
+    provider: params.provider,
+    model: params.model,
+    promptTokens: params.usage.promptTokens,
+    completionTokens: params.usage.completionTokens,
+    totalTokens: params.usage.totalTokens,
+  });
+
+  const credits = creditResult?.credits ?? 0;
+  const estimatedCostUsd = creditResult?.estimatedCostUsd ?? 0;
+  const consumerPointsDelta = params.isDirected ? 0 : -credits;
+  const providerPointsDelta = params.isDirected || params.isAdminSupply ? 0 : credits;
+
+  const operations: Prisma.PrismaPromise<unknown>[] = [
     prisma.requestLog.create({
-      data: { consumerId, tokenId, tokensUsed, isDirected, status: "SUCCESS" }
+      data: {
+        consumerId: params.consumerId,
+        tokenId: params.tokenId,
+        tokensUsed: params.usage.totalTokens,
+        promptTokens: params.usage.promptTokens,
+        completionTokens: params.usage.completionTokens,
+        provider: params.provider,
+        model: params.model,
+        inputPricePerM: creditResult?.pricing.inputPricePerM,
+        outputPricePerM: creditResult?.pricing.outputPricePerM,
+        estimatedCostUsd,
+        consumerPointsDelta,
+        providerPointsDelta,
+        pricingSourceUrl: creditResult?.pricing.sourceUrl,
+        pricingRefreshedAt: creditResult?.pricing.fetchedAt,
+        isDirected: params.isDirected,
+        status: "SUCCESS",
+      }
     })
   ];
 
   // 定向 Token：不计入总额度，不扣分，不加分
-  if (!isDirected) {
+  if (!params.isDirected) {
     // 更新 token 使用量（仅非定向）
-    ops.push(
+    operations.push(
       prisma.tokenKey.update({
-        where: { id: tokenId },
-        data: { totalUsedTokens: { increment: tokensUsed } }
+        where: { id: params.tokenId },
+        data: { totalUsedTokens: { increment: params.usage.totalTokens } }
       })
     );
     // 扣消费者点数
-    ops.push(
+    operations.push(
       prisma.user.update({
-        where: { id: consumerId },
-        data: { points: { decrement: tokensUsed } }
+        where: { id: params.consumerId },
+        data: { points: { increment: consumerPointsDelta } }
       })
     );
     // 非管理员供应的，奖励提供者
-    if (!isAdminSupply) {
-      ops.push(
+    if (!params.isAdminSupply) {
+      operations.push(
         prisma.user.update({
-          where: { id: providerId },
-          data: { points: { increment: tokensUsed } }
+          where: { id: params.providerOwnerId },
+          data: { points: { increment: providerPointsDelta } }
         })
       );
     }
   }
 
-  await prisma.$transaction(ops).catch((e: any) => console.error("Billing commit failed: ", e));
+  await prisma.$transaction(operations).catch((error) => console.error("Billing commit failed:", error));
 }
