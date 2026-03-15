@@ -4,6 +4,7 @@ import DashboardCopyKey from "./components/DashboardCopyKey";
 import PlatformKeyCard from "./components/PlatformKeyCard";
 import AddTokenForm from "./components/AddTokenForm";
 import TokenList from "./components/TokenList";
+import UsageLogPanel from "./components/UsageLogPanel";
 import { getLocale, getTranslations } from "next-intl/server";
 
 type UsageLogType = "usage" | "provided" | "directedUsage" | "directedProvided";
@@ -19,31 +20,6 @@ type DashboardLog = {
     displayName: string | null;
   };
 };
-
-function getUsageLogMeta(type: UsageLogType) {
-  switch (type) {
-    case "usage":
-      return {
-        badgeClass: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
-        dotClass: "bg-emerald-500",
-      };
-    case "provided":
-      return {
-        badgeClass: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
-        dotClass: "bg-amber-500",
-      };
-    case "directedUsage":
-      return {
-        badgeClass: "bg-sky-500/10 text-sky-600 dark:text-sky-400",
-        dotClass: "bg-sky-500",
-      };
-    case "directedProvided":
-      return {
-        badgeClass: "bg-fuchsia-500/10 text-fuchsia-600 dark:text-fuchsia-400",
-        dotClass: "bg-fuchsia-500",
-      };
-  }
-}
 
 export default async function DashboardPage() {
   const session = await verifySession();
@@ -78,7 +54,7 @@ export default async function DashboardPage() {
         }
       }
     },
-    take: 20,
+    take: 80,
     orderBy: { createdAt: "desc" }
   });
 
@@ -89,9 +65,23 @@ export default async function DashboardPage() {
         : (req.isDirected ? "directedProvided" : "provided");
 
     return {
-      ...req,
+      id: req.id,
       type,
-      meta: getUsageLogMeta(type),
+      status: req.status,
+      description:
+        type === "usage"
+          ? t("logUsage", { count: req.tokensUsed })
+          : type === "provided"
+            ? t("logProvided", { count: req.tokensUsed, username: req.consumer?.displayName || req.consumer?.username || t("someone") })
+            : type === "directedUsage"
+              ? t("logDirectedUsage", { count: req.tokensUsed })
+              : t("logDirectedProvided", { count: req.tokensUsed, username: req.consumer?.displayName || req.consumer?.username || t("someone") }),
+      createdAtLabel: new Intl.DateTimeFormat(locale, {
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+      }).format(req.createdAt),
     };
   });
 
@@ -156,46 +146,21 @@ export default async function DashboardPage() {
           {/* Usage Log (merged: normal + directed with different colors) */}
           <div className="bg-white dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-2xl p-6 shadow-sm">
             <h3 className="text-xl font-semibold text-zinc-900 dark:text-white mb-6">{t("usage")}</h3>
-            {mergedLogs.length === 0 ? (
-              <p className="text-sm text-zinc-500">{t("noLogs")}</p>
-            ) : (
-              <ul className="divide-y divide-zinc-200 dark:divide-white/10">
-                {mergedLogs.map((req) => (
-                  <li key={req.id} className="py-3 flex justify-between items-center text-sm">
-                    <div className="min-w-0 pr-4">
-                      <div className="flex items-center gap-2">
-                        <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${req.meta.dotClass}`}></span>
-                        <span className="text-zinc-700 dark:text-zinc-200">
-                          {req.type === "usage" && t("logUsage", { count: req.tokensUsed })}
-                          {req.type === "provided" && t("logProvided", { count: req.tokensUsed, username: req.consumer?.displayName || req.consumer?.username || t("someone") })}
-                          {req.type === "directedUsage" && t("logDirectedUsage", { count: req.tokensUsed })}
-                          {req.type === "directedProvided" && t("logDirectedProvided", { count: req.tokensUsed, username: req.consumer?.displayName || req.consumer?.username || t("someone") })}
-                        </span>
-                      </div>
-                      <p className="mt-1 pl-[18px] text-xs text-zinc-500 dark:text-zinc-400">
-                        {new Intl.DateTimeFormat(locale, {
-                          month: "2-digit",
-                          day: "2-digit",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        }).format(req.createdAt)}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className={`px-2 py-1 rounded text-xs font-medium ${req.meta.badgeClass}`}>
-                        {req.type === "usage" && t("usageLabel")}
-                        {req.type === "provided" && t("providedLabel")}
-                        {req.type === "directedUsage" && t("directedUsageLabel")}
-                        {req.type === "directedProvided" && t("directedProvidedLabel")}
-                      </span>
-                      <span className={`px-2 py-1 rounded text-xs font-medium ${req.status === 'SUCCESS' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500'}`}>
-                        {req.status}
-                      </span>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
+            <UsageLogPanel
+              logs={mergedLogs}
+              texts={{
+                noLogs: t("noLogs"),
+                noLogsForFilter: t("noLogsForFilter"),
+                all: t("allLogTypes"),
+                usage: t("usageLabel"),
+                provided: t("providedLabel"),
+                directedUsage: t("directedUsageLabel"),
+                directedProvided: t("directedProvidedLabel"),
+                prevPage: t("prevPage"),
+                nextPage: t("nextPage"),
+                pageLabel: t("pageLabel"),
+              }}
+            />
           </div>
 
           {/* Announcement Board */}
