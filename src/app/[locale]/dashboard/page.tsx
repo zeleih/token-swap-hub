@@ -57,17 +57,15 @@ export default async function DashboardPage() {
           <DashboardCopyKey platformKey={platformUrl} copyText={t("copy")} />
           <p className="text-xs text-zinc-400 mt-2">{t("platformKeyTip")}</p>
         </div>
-
       </div>
 
       {/* Grid for Shared Tokens and Logs */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
         <div className="lg:col-span-2 space-y-6">
+          {/* Token List */}
           <div className="bg-white dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-2xl p-6 shadow-sm">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-semibold text-zinc-900 dark:text-white">{t("yourTokens")}</h3>
-            </div>
+            <h3 className="text-xl font-semibold text-zinc-900 dark:text-white mb-6">{t("yourTokens")}</h3>
             <TokenList
               tokens={user.providedTokens}
               noTokensText={t("noTokens")}
@@ -77,6 +75,7 @@ export default async function DashboardPage() {
             />
           </div>
 
+          {/* Usage Log */}
           <div className="bg-white dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-2xl p-6 shadow-sm">
             <h3 className="text-xl font-semibold text-zinc-900 dark:text-white mb-6">{t("usage")}</h3>
             {user.requestsMade.length === 0 ? (
@@ -94,8 +93,23 @@ export default async function DashboardPage() {
               </ul>
             )}
           </div>
+
+          {/* Announcement Board */}
+          <div className="bg-gradient-to-br from-blue-50/80 to-purple-50/80 dark:from-blue-900/10 dark:to-purple-900/10 border border-blue-200/50 dark:border-blue-500/10 rounded-2xl p-6 shadow-sm">
+            <div className="flex items-center gap-2 mb-4">
+              <span className="text-xl">📢</span>
+              <h3 className="text-xl font-semibold text-zinc-900 dark:text-white">{t("announcement")}</h3>
+            </div>
+            <div className="prose prose-sm dark:prose-invert max-w-none">
+              <div className="bg-white/60 dark:bg-white/5 rounded-xl p-4 border border-zinc-200/50 dark:border-white/5">
+                <h4 className="text-base font-semibold text-zinc-800 dark:text-zinc-200 mb-2">{t("announcementTitle")}</h4>
+                <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed whitespace-pre-line">{t("announcementContent")}</p>
+              </div>
+            </div>
+          </div>
         </div>
 
+        {/* Right: Add Token */}
         <div className="lg:col-span-1">
            <AddTokenForm
              title={t("addToken")}
@@ -114,9 +128,7 @@ export default async function DashboardPage() {
              oauthComingSoon={t("oauthComingSoon")}
            />
         </div>
-
       </div>
-
     </div>
   );
 }

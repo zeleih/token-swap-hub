@@ -49,7 +49,7 @@
     "usageLimitPlaceholder": "Leave empty for unlimited",
     "allowedUsers": "Allowed Users",
     "allowedUsersPlaceholder": "Comma-separated usernames, empty=everyone",
-    "allowedUsersTip": "Directed tokens won't earn you credit points",
+    "allowedUsersTip": "Directed tokens are free for both parties (no points charged)",
     "profile": "Profile",
     "displayName": "Display Name",
     "displayNamePlaceholder": "Set your display name",
@@ -81,6 +81,12 @@
     "oauthTab": "OAuth",
     "manualTab": "Manual Input",
     "oauthComingSoon": "OAuth authorization is coming soon, stay tuned.",
-    "close": "Close"
+    "close": "Close",
+    "tools": "Tools",
+    "toolsTitle": "Personal Toolbox",
+    "toolsSubtitle": "Quota management, multi-platform monitoring and more features are under development.",
+    "announcement": "Announcements",
+    "announcementTitle": "🎉 Welcome to Token Swap Hub",
+    "announcementContent": "This platform helps you share idle AI tokens among friends.\n\n🔑 Share Tokens → Earn credits\n💎 Spend credits → Use collective AI power\n🎯 Directed sharing → Friends use for free, no charges\n🏆 Leaderboard → See community rankings\n\nContact the admin if you need help. Enjoy!"
   }
 }

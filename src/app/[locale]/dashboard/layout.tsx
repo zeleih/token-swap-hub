@@ -5,6 +5,8 @@ import { Link } from "@/i18n/routing";
 import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
 import DashboardActions from "./components/DashboardActions";
+import ThemeToggle from "@/components/ThemeToggle";
+import Sidebar from "@/components/Sidebar";
 
 export default async function DashboardLayout({
   children,
@@ -26,7 +28,6 @@ export default async function DashboardLayout({
     select: { username: true, displayName: true, showOnLeaderboard: true }
   });
 
-  // Collect all texts needed by client components
   const actionTexts = {
     profile: t("profile"), displayName: t("displayName"),
     displayNamePlaceholder: t("displayNamePlaceholder"),
@@ -45,31 +46,39 @@ export default async function DashboardLayout({
     doTransfer: t("doTransfer"), transferring: t("transferring"),
   };
 
+  const sidebarItems = [
+    { icon: "📊", label: t("title"), href: "/dashboard" },
+    { icon: "🔧", label: t("tools"), href: "/dashboard/tools" },
+  ];
+
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 font-sans">
-      <nav className="sticky top-0 z-50 w-full border-b border-zinc-200 dark:border-white/10 bg-white/50 dark:bg-black/50 backdrop-blur-xl">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Top Nav */}
+      <nav className="sticky top-0 z-50 w-full border-b border-zinc-200 dark:border-white/10 bg-white/80 dark:bg-black/50 backdrop-blur-xl">
+        <div className="px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
+              <span className="text-xl">⚡</span>
               <Link href="/dashboard" className="text-lg font-bold text-zinc-900 dark:text-white">
-                {t("title")}
+                Token Hub
               </Link>
             </div>
             
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
               {user && (
                 <DashboardActions
                   user={{ displayName: user.displayName, showOnLeaderboard: user.showOnLeaderboard }}
                   texts={actionTexts}
                 />
               )}
-              <span className="text-sm text-zinc-500 dark:text-zinc-400 hidden sm:inline">
+              <ThemeToggle />
+              <span className="text-sm text-zinc-500 dark:text-zinc-400 hidden sm:inline ml-2">
                 {user?.displayName || user?.username}
               </span>
               <form action={logoutAction}>
                 <button
                   type="submit"
-                  className="text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors px-3 py-2"
+                  className="text-sm font-medium text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors px-3 py-2"
                 >
                   {t("logout")}
                 </button>
@@ -79,9 +88,15 @@ export default async function DashboardLayout({
         </div>
       </nav>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {children}
-      </main>
+      <div className="flex">
+        {/* Left Sidebar */}
+        <Sidebar items={sidebarItems} />
+
+        {/* Main Content */}
+        <main className="flex-1 px-4 sm:px-6 lg:px-8 py-8 min-w-0">
+          {children}
+        </main>
+      </div>
     </div>
   );
 }

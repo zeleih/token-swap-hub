@@ -167,30 +167,37 @@ async function handleProxy(req: NextRequest, params: { path: string[] }) {
 
 async function commitBilling(consumerId: string, tokenId: string, providerId: string, tokensUsed: number, isAdminSupply: boolean, isDirected: boolean) {
   if (tokensUsed <= 0) return;
-  // 定向 Token 或管理员供应的 Token 不给提供者积分
-  const shouldRewardProvider = !isAdminSupply && !isDirected;
 
   const ops: any[] = [
-    prisma.user.update({
-      where: { id: consumerId },
-      data: { points: { decrement: tokensUsed } }
-    }),
+    // 更新 token 使用量（始终记录）
     prisma.tokenKey.update({
       where: { id: tokenId },
       data: { totalUsedTokens: { increment: tokensUsed } }
     }),
+    // 记录请求日志（始终记录）
     prisma.requestLog.create({
       data: { consumerId, tokenId, tokensUsed, status: "SUCCESS" }
     })
   ];
 
-  if (shouldRewardProvider) {
+  // 定向 Token：消费者不扣点，提供者也不加点
+  if (!isDirected) {
+    // 扣消费者点数
     ops.push(
       prisma.user.update({
-        where: { id: providerId },
-        data: { points: { increment: tokensUsed } }
+        where: { id: consumerId },
+        data: { points: { decrement: tokensUsed } }
       })
     );
+    // 非管理员供应的，奖励提供者
+    if (!isAdminSupply) {
+      ops.push(
+        prisma.user.update({
+          where: { id: providerId },
+          data: { points: { increment: tokensUsed } }
+        })
+      );
+    }
   }
 
   await prisma.$transaction(ops).catch((e: any) => console.error("Billing commit failed: ", e));
