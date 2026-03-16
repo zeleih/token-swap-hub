@@ -192,7 +192,7 @@
     "noAnnouncements": "当前暂无公告。",
     "announcementPublishedAt": "发布时间",
     "announcementTitle": "⚠️ 平台测试中 — 欢迎体验与反馈",
-    "announcementContent": "🚧 当前平台处于测试阶段，功能可能存在不稳定的情况。\n\n📩 如果您发现了任何 Bug，请发送邮件至 hhuhzl@outlook.com 描述问题。经确认的有效 Bug 将获得 Token 奖励！\n\n---\n\n📌 平台功能简介：\n🔑 分享您的 Token → 赚取信用点数\n💎 消耗信用点数 → 使用共享池的 AI 能力\n🎯 定向开放 → 指定好友免费使用，双方不计费、不计排名\n🏆 排行榜 → 查看社区贡献与消费排名（不含定向）\n🌐 当前支持：OpenAI 与自定义 OpenAI 兼容平台\n\n感谢您的参与和支持！",
+    "announcementContent": "🚧 当前平台处于测试阶段，功能可能存在不稳定的情况。\n\n📩 如果您发现了任何 Bug，欢迎通过仓库 Issues 或 Pull Request 反馈问题与建议。\n\n---\n\n📌 平台功能简介：\n🔑 分享您的 Token → 赚取信用点数\n💎 消耗信用点数 → 使用共享池的 AI 能力\n🎯 定向开放 → 指定好友免费使用，双方不计费、不计排名\n🏆 排行榜 → 查看社区贡献与消费排名（不含定向）\n🌐 当前支持：OpenAI 与自定义 OpenAI 兼容平台\n\n感谢您的参与和支持！",
     "admin": "后台",
     "adminTitle": "管理后台",
     "adminSubtitle": "管理员可以在这里维护公告列表。",

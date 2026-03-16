@@ -6,7 +6,7 @@
 > **如何快速在本地启动体验？**
 > 
 > 1. 打开您的终端（Terminal）。
-> 2. 进入项目目录：`cd /Users/hhuhzl/.gemini/antigravity/playground/warped-voyager`
+> 2. 进入项目目录：`cd /path/to/token-swap-hub`
 > 3. 运行：`npm run dev`
 > 4. 使用浏览器访问：`http://localhost:3000`
 

@@ -192,7 +192,7 @@
     "noAnnouncements": "No announcements yet.",
     "announcementPublishedAt": "Published",
     "announcementTitle": "⚠️ Platform in Testing — Your Feedback Matters",
-    "announcementContent": "🚧 The platform is currently in testing. Some features may be unstable.\n\n📩 If you find any bugs, email hhuhzl@outlook.com with details. Confirmed valid bugs will be rewarded with tokens!\n\n---\n\n📌 Platform Features:\n🔑 Share Tokens → Earn credits\n💎 Spend credits → Use collective AI power\n🎯 Directed sharing → Friends use for free, no credits or rankings impact\n🏆 Leaderboard → See community rankings (excludes directed)\n🌐 Currently supported: OpenAI and custom OpenAI-compatible platforms\n\nThank you for your participation and support!",
+    "announcementContent": "🚧 The platform is currently in testing. Some features may be unstable.\n\n📩 If you spot any bugs, please share feedback through repository issues or pull requests.\n\n---\n\n📌 Platform Features:\n🔑 Share Tokens → Earn credits\n💎 Spend credits → Use collective AI power\n🎯 Directed sharing → Friends use for free, no credits or rankings impact\n🏆 Leaderboard → See community rankings (excludes directed)\n🌐 Currently supported: OpenAI and custom OpenAI-compatible platforms\n\nThank you for your participation and support!",
     "admin": "Admin",
     "adminTitle": "Admin Panel",
     "adminSubtitle": "Administrators can manage the announcement list here.",
